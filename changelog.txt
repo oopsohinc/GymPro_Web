@@ -5,6 +5,7 @@ Version 1.0.2 - 2025-07-24
 --------------------------
 - Tạo `api/membership.js` để lấy dữu liệu gói tập
 - Thêm chức năng add membership
+- Đã tạo phân vùng của member (chuẩn bị tích hợp)
 
 Version 1.0.1 - 2025-07-23
 --------------------------

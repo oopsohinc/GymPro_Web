@@ -7,6 +7,7 @@ Version 1.0.2 - 2025-07-24
 - Thêm chức năng add membership
 - Đã tạo phân vùng của member (chuẩn bị tích hợp)
 - Tích hợp với git và đẩy lên githup để quản lý code
+- Thêm file sql mới
 
 Version 1.0.1 - 2025-07-23
 --------------------------

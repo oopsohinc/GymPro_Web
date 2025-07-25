@@ -1,0 +1,28 @@
+Changelog - Gym Management WebApp
+==================================
+
+Version 1.0.2 - 2025-07-24
+--------------------------
+- Tạo `api/membership.js` để lấy dữu liệu gói tập
+- Thêm chức năng add membership
+
+Version 1.0.1 - 2025-07-23
+--------------------------
+- Tối ưu mobile menu (cần làm tiếp)
+- Tối ưu phần header
+- Thêm membership page
+
+Version 1.0.0 - 2025-07-22
+--------------------------
+- Thêm logout trong mobile menu, khi click ra ngoài mobile menu sẽ tự động ẩn menu.
+- Cải thiện trải nghiệm khi nhập sai tài khoản: thông báo lỗi hiển thị đẹp hơn, input không bị đổi màu bất thường.
+- Fix lỗi URL chuyển hướng sai sau logout.
+- Sửa lỗi fetch dữ liệu thống kê trả về HTML thay vì JSON.
+- Dữ liệu số lượng thành viên sẽ tự động cập nhật mỗi khi load dashboard.
+- Tạo API `/api/stats` để lấy dữ liệu thống kê (số lượng thành viên).
+- Thêm middleware `cors` và `body-parser` cho backend.
+- Sửa cấu trúc folder `public/` chứa HTML, CSS, JS tĩnh.
+- Fix lỗi `Cannot GET /` khi truy cập root URL.
+- Tạo cấu trúc backend sử dụng Node.js + Express + SQL Server.
+- Thêm bảng `Members`, tự động đồng bộ dữ liệu khi user có `role = 'member'`.
+- Thiết lập route `/api/login` để xác thực người dùng.

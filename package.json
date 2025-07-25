@@ -1,0 +1,21 @@
+{
+  "name": "demo3",
+  "version": "1.0.2",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"node backend/index.js\" \"live-server public --port=5500 --entry-file=login.html\""
+  },
+  "keywords": [],
+  "author": "ophnc",
+  "license": "ISC",
+  "description": "Web application demo with Node.js backend and live server for frontend (WIP)",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "concurrently": "^7.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mssql": "^11.0.1",
+    "open": "^10.2.0"
+  }
+}

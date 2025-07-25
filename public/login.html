@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GymPro - Đăng nhập</title>
+  <link rel="stylesheet" href="/css/styleLogin.css" />
+  <style>
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #64748b;
+      transition: color 0.2s ease, border-bottom 0.2s ease;
+    }
+
+    .tab.active {
+      color: #9333ea;
+      border-bottom: 2px solid #9333ea;
+    }
+
+    .tab:hover {
+      color: #9333ea;
+    }
+
+    #register-section {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: none;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    .close-btn:hover {
+      color: #9333ea;
+    }
+
+    /* Mặc định input */
+.form-input {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+  outline: none;
+  padding: 8px;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+
+/* Khi có lỗi */
+.form-input.error {
+  border-color: #e74c3c; /* Viền đỏ */
+  /* Không thay đổi màu nền */
+}
+
+/* Thông báo lỗi */
+.error-message {
+  color: #e74c3c;
+  font-size: 0.875em;
+  margin-top: 4px;
+  display: none;
+}
+  </style>
+</head>
+
+<body>
+  <div class="overlay hidden" id="overlay"></div>
+  <div class="login-container">
+    <div class="card p-6">
+      <h2 class="flex items-center justify-center space-x-2">
+        <i data-lucide="dumbbell" class="w-8 h-8 text-purple-700"></i>
+        <span>Đăng nhập vào GymPro</span>
+      </h2>
+      <p class="text-center mt-2">Chào mừng bạn đến với GymPro! Vui lòng đăng nhập để tiếp tục.</p>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('owner')">Chủ phòng</div>
+        <div class="tab" onclick="showTab('member')">Thành viên</div>
+      </div>
+
+      <!-- Form đăng nhập của chủ phòng -->
+      <form id="owner-tab" class="tab-content">
+        <div class="form-group">
+          <label class="form-label">Tên đăng nhập</label>
+          <input type="text" class="form-input" id="username" placeholder="admin" />
+          <div class="error-message" id="username-error"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu</label>
+          <input type="password" class="form-input" id="password" placeholder="••••••••" />
+          <div class="error-message" id="password-error"></div>
+        </div>
+        <button class="btn-primary w-full mt-4">Đăng nhập</button>
+      </form>
+
+      <!-- Form đăng nhập + đăng ký của thành viên -->
+      <form id="member-tab" class="tab-content hidden">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" placeholder="user@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu</label>
+          <input type="password" class="form-input" placeholder="••••••••" />
+        </div>
+        <button class="btn-primary w-full gap-6 mt-4">Đăng nhập</button>
+        <button class="btn-secondary w-full mt-4" onclick="toggleRegister(event)">Đăng ký tài khoản mới</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Phần đăng ký -->
+  <div class="hidden" id="register-section">
+    <button class="close-btn" onclick="closeRegister()">×</button>
+    <h3 class="text-sm font-semibold mb-2">Đăng ký tài khoản mới</h3>
+    <div class="form-group">
+      <label class="form-label">Họ tên</label>
+      <input type="text" class="form-input" placeholder="Nguyễn Văn A" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" placeholder="newuser@example.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mật khẩu</label>
+      <input type="password" class="form-input" placeholder="••••••••" />
+    </div>
+    <button class="btn-secondary w-full mt-4">Đăng ký</button>
+  </div>
+
+  <script src="/js/scriptLogin.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>

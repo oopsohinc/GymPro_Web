@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymPro - Member Dashboard</title>
+    <meta name="description" content="Modern fitness facility member dashboard for managing profiles, memberships, and class registrations with intuitive booking system.">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <header class="header">
+            <div class="header-container">
+                <div class="logo">
+                    <i data-lucide="dumbbell" class="logo-icon"></i>
+                    <span class="logo-text">GymPro</span>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
+                    <a href="#" class="nav-link" data-page="memberships">Memberships</a>
+                    <a href="#" class="nav-link" data-page="classes">Classes</a>
+                    <a href="#" class="nav-link" data-page="profile">Profile</a>
+                </nav>
+
+                <!-- Mobile menu button -->
+                <button class="nav-toggle" id="nav-toggle">
+                    <div class="hamburger">
+                        <div class="hamburger-line"></div>
+                        <div class="hamburger-line"></div>
+                        <div class="hamburger-line"></div>
+                    </div>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu">
+            <div class="mobile-menu-content">
+                <div class="mobile-menu-header">
+                    <div class="logo">
+                        <i data-lucide="dumbbell" class="logo-icon"></i>
+                        <span class="logo-text">GymPro</span>
+                    </div>
+                    <button id="close-menu-button">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="mobile-menu-links">
+                    <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
+                    <a href="#" class="nav-link" data-page="memberships">Memberships</a>
+                    <a href="#" class="nav-link" data-page="classes">Classes</a>
+                    <a href="#" class="nav-link" data-page="profile">Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <div class="page-header">
+                    <h1>Welcome back, John!</h1>
+                    <p>Manage your fitness journey and stay on track with your goals.</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <div class="stats-content">
+                            <div class="stats-info">
+                                <p class="stats-label">Active Membership</p>
+                                <p class="stats-value" id="active-membership">Premium</p>
+                                <p class="stats-meta">Expires Mar 15, 2024</p>
+                            </div>
+                            <div class="stats-icon icon-primary">
+                                <i data-lucide="crown"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card">
+                        <div class="stats-content">
+                            <div class="stats-info">
+                                <p class="stats-label">Classes Booked</p>
+                                <p class="stats-value" id="classes-booked">3</p>
+                                <p class="stats-meta">This month</p>
+                            </div>
+                            <div class="stats-icon icon-primary">
+                                <i data-lucide="calendar-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card">
+                        <div class="stats-content">
+                            <div class="stats-info">
+                                <p class="stats-label">Available Memberships</p>
+                                <p class="stats-value" id="available-memberships">3</p>
+                                <p class="stats-meta">Ready to upgrade</p>
+                            </div>
+                            <div class="stats-icon icon-primary">
+                                <i data-lucide="star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="dashboard-grid">
+                    <!-- Classes Today -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Classes Today</h3>
+                        </div>
+                        <div class="card-content" id="classes-today">
+                            <!-- Classes will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="quick-actions">
+                                <button class="btn-primary featured-action" data-action="register-membership">
+                                    <i data-lucide="crown"></i>
+                                    <span>Register Membership</span>
+                                </button>
+                                
+                                <button class="btn-secondary" data-action="book-classes">
+                                    <i data-lucide="calendar-plus"></i>
+                                    <span>Book Classes</span>
+                                </button>
+                                
+                                <button class="btn-secondary" data-action="update-profile">
+                                    <i data-lucide="user-cog"></i>
+                                    <span>Update Profile</span>
+                                </button>
+                                
+                                <button class="btn-secondary" data-action="track-progress">
+                                    <i data-lucide="heart"></i>
+                                    <span>Track Progress</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memberships Page -->
+            <div id="memberships-page" class="page">
+                <div class="page-header">
+                    <h1>Membership Plans</h1>
+                    <p>Choose the perfect plan for your fitness journey.</p>
+                </div>
+
+                <div class="memberships-grid" id="memberships-grid">
+                    <!-- Membership cards will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Classes Page -->
+            <div id="classes-page" class="page">
+                <div class="page-header">
+                    <h1>Fitness Classes</h1>
+                    <p>Browse and book our wide variety of fitness classes.</p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card filter-card">
+                    <div class="card-content">
+                        <div class="filters-grid">
+                            <div class="filter-group">
+                                <label for="search-classes">Search Classes</label>
+                                <div class="search-input">
+                                    <input type="text" id="search-classes" placeholder="Search by name...">
+                                    <i data-lucide="search"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="category-filter">Category</label>
+                                <select id="category-filter">
+                                    <option value="">All Categories</option>
+                                    <option value="Yoga">Yoga</option>
+                                    <option value="HIIT">HIIT</option>
+                                    <option value="Strength">Strength</option>
+                                    <option value="Cardio">Cardio</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="time-filter">Time</label>
+                                <select id="time-filter">
+                                    <option value="">Any Time</option>
+                                    <option value="morning">Morning (6-12)</option>
+                                    <option value="afternoon">Afternoon (12-18)</option>
+                                    <option value="evening">Evening (18-22)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="trainer-filter">Instructor</label>
+                                <select id="trainer-filter">
+                                    <option value="">All Instructors</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classes Grid -->
+                <div class="classes-grid" id="classes-grid">
+                    <!-- Classes will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="page">
+                <div class="page-header">
+                    <h1>My Profile</h1>
+                    <p>Manage your personal information and preferences.</p>
+                </div>
+
+                <div class="profile-grid">
+                    <!-- Profile Form -->
+                    <div class="profile-main">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Personal Information</h3>
+                            </div>
+                            <div class="card-content">
+                                <form id="profile-form" class="profile-form">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="firstName">First Name</label>
+                                            <input type="text" id="firstName" name="firstName" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lastName">Last Name</label>
+                                            <input type="text" id="lastName" name="lastName" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" name="email" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="phone">Phone Number</label>
+                                        <input type="tel" id="phone" name="phone">
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="birthDate">Date of Birth</label>
+                                            <input type="date" id="birthDate" name="birthDate">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="emergencyContact">Emergency Contact</label>
+                                            <input type="tel" id="emergencyContact" name="emergencyContact">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="fitnessGoals">Fitness Goals</label>
+                                        <textarea id="fitnessGoals" name="fitnessGoals" rows="3" placeholder="Describe your fitness goals..."></textarea>
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn-primary">Save Changes</button>
+                                        <button type="button" class="btn-secondary" onclick="loadProfileData()">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Sidebar -->
+                    <div class="profile-sidebar">
+                        <div class="card profile-card">
+                            <div class="card-content">
+                                <div class="profile-avatar">
+                                    <div class="avatar-circle">
+                                        <span id="avatar-initials">JS</span>
+                                    </div>
+                                    <h3 id="profile-name">John Smith</h3>
+                                    <p id="profile-membership">Premium Member</p>
+                                </div>
+                                
+                                <div class="profile-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">Member Since</span>
+                                        <span class="stat-value">Jan 2023</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">Classes Attended</span>
+                                        <span class="stat-value">127</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">Current Streak</span>
+                                        <span class="stat-value">12 days</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preferences -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Preferences</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="preferences">
+                                    <div class="preference-item">
+                                        <span>Email Notifications</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="emailNotifications" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="preference-item">
+                                        <span>SMS Reminders</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="smsReminders">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="preference-item">
+                                        <span>Class Reminders</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="classReminders" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay">
+        <!-- Class Booking Modal -->
+        <div id="class-booking-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Book Class</h3>
+                    <button class="modal-close" onclick="closeModal('class-booking-modal')">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="class-info">
+                        <h4 id="booking-class-name">Class Name</h4>
+                        <p id="booking-trainer-name">Trainer Name</p>
+                        <p>Select your preferred time slot</p>
+                    </div>
+                    
+                    <div class="time-slots" id="time-slots">
+                        <!-- Time slots will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="confirmBooking()">Confirm Booking</button>
+                    <button class="btn-secondary" onclick="closeModal('class-booking-modal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Upgrade Modal -->
+        <div id="membership-upgrade-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="upgrade-title">Upgrade Membership</h3>
+                    <button class="modal-close" onclick="closeModal('membership-upgrade-modal')">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="membership-preview" id="membership-preview">
+                        <!-- Membership info will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="payment-form">
+                        <h4>Payment Information</h4>
+                        <form id="payment-form">
+                            <div class="form-group">
+                                <label for="cardholderName">Cardholder Name</label>
+                                <input type="text" id="cardholderName" placeholder="John Smith" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cardNumber">Card Number</label>
+                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="expiryDate">Expiry Date</label>
+                                    <input type="text" id="expiryDate" placeholder="MM/YY" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cvv">CVV</label>
+                                    <input type="text" id="cvv" placeholder="123" required>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="processUpgrade()">Upgrade Now</button>
+                    <button class="btn-secondary" onclick="closeModal('membership-upgrade-modal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

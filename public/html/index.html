@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Gym Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<style>
+
+</style>
+
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <header class="header">
+            <div class="header-container">
+                <!-- <nav class="bg-white shadow-sm border-b border-gray-200"> -->
+                <!-- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 "> -->
+                <!-- <div class="flex justify-between h-16"> -->
+                <!-- <div class="flex items-center"> -->
+                <div class="flex-shrink-0 flex items-center">
+                    <i data-lucide="dumbbell" class="h-8 w-8 text-purple-600"></i>
+                    <span class="ml-2 text-xl font-bold text-gray-900">GymPro</span>
+                </div>
+                <!-- </div> -->
+
+                <!-- Desktop Navigation -->
+                <div class="desktop-nav flex items-center space-x-8">
+                    <a href="#"
+                        class="nav-link-active px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 item"
+                        onclick="showPage('dashboard')">Dashboard</a>
+                    <a href="#"
+                        class="text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 item"
+                        onclick="showPage('members')">Members</a>
+                    <a href="#"
+                        class="text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 item"
+                        onclick="showPage('trainers')">Trainers</a>
+                    <a href="#"
+                        class="text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 item"
+                        onclick="showPage('schedule')">Schedule</a>
+                    <a href="#"
+                        class="text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 item"
+                        onclick="showPage('payments')">Payments</a>
+                    <a href="#"
+                        class="text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                        onclick="showPage('membership')">Membership</a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div id="nav-toggle" class="mobile-nav flex nav-toggle items-center">
+                    <button id="menu-button">
+                        <div class="hamburger">
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                        </div>
+                    </button>
+                </div>
+                <!-- Mobile Navigation Toggle -->
+                <!-- <button id="nav-toggle" class="nav-toggle" aria-label="Open navigation menu" aria-expanded="false"
+                                aria-controls="mobile-menu">
+                                <div class="hamburger">
+                                    <div class="hamburger-line"></div>
+                                    <div class="hamburger-line"></div>
+                                    <div class="hamburger-line"></div>
+                                </div>
+                            </button> -->
+                <!-- </div> -->
+                <!-- </div> -->
+                <!-- </nav> -->
+            </div>
+        </header>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+        <!-- Mobile Menu -->
+        <!-- <div id="mobile-menu" class="mobile-menu hidden"> -->
+        <div id="mobile-menu"
+            class="fixed right-0 top-0 h-full w-64 bg-white shadow-lg z-50 hidden flex flex-col justify-between">
+            <div class="mobile-menu-content">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <i data-lucide="dumbbell" class="h-8 w-8 text-purple-600"></i>
+                        <span class="ml-2 text-xl font-bold text-gray-900">GymPro</span>
+                    </div>
+                    <!-- <button onclick="toggleMobileMenu()" class="text-gray-700 hover:text-purple-700 p-2">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button> -->
+                    <button id="close-menu-button" class="p-2"><i data-lucide="x"></i></button>
+                </div>
+                <div class="space-y-2">
+                    <a href="#" class="block px-3 py-2 rounded-md text-base font-medium nav-link-active"
+                        onclick="showPage('dashboard'); toggleMobileMenu()">Dashboard</a>
+                    <a href="#"
+                        class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-700 hover:bg-purple-50"
+                        onclick="showPage('members'); toggleMobileMenu()">Members</a>
+                    <a href="#"
+                        class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-700 hover:bg-purple-50"
+                        onclick="showPage('trainers'); toggleMobileMenu()">Trainers</a>
+                    <a href="#"
+                        class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-700 hover:bg-purple-50"
+                        onclick="showPage('schedule'); toggleMobileMenu()">Schedule</a>
+                    <a href="#"
+                        class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-700 hover:bg-purple-50"
+                        onclick="showPage('payments'); toggleMobileMenu()">Payments</a>
+                    <hr class="my-2 border-gray-300" />
+                    <button id="logout-btn"
+                        class="text-red-600 font-semibold px-4 py-2 w-full text-left hover:bg-red-100">
+                        Đăng xuất
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h2>
+                    <p class="text-gray-600">Chào mừng trở lại! Đây là những gì đang diễn ra tại phòng tập của bạn.</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Members</p>
+                                <p id="total-members" class="text-2xl font-bold text-gray-900">0</p>
+                                <p class="text-sm text-green-600">+...% from last month</p>
+                            </div>
+                            <div class="icon-wrapper icon-primary">
+                                <i data-lucide="users" class="h-5 w-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Active Trainers</p>
+                                <p class="text-2xl font-bold text-gray-900">0</p>
+                                <p class="text-sm text-green-600">+...% from last month</p>
+                            </div>
+                            <div class="icon-wrapper icon-primary">
+                                <i data-lucide="user-check" class="h-5 w-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Today's Classes</p>
+                                <p class="text-2xl font-bold text-gray-900">0</p>
+                                <p class="text-sm text-blue-600">... more scheduled</p>
+                            </div>
+                            <div class="icon-wrapper icon-primary">
+                                <i data-lucide="calendar" class="h-5 w-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                                <p class="text-2xl font-bold text-gray-900">₫0</p>
+                                <p class="text-sm text-green-600">+...% from last month</p>
+                            </div>
+                            <div class="icon-wrapper icon-primary">
+                                <i data-lucide="dollar-sign" class="h-5 w-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button class="btn-primary w-full flex items-center justify-center"
+                                onclick="showAddMemberModal()">
+                                <i data-lucide="user-plus" class="h-4 w-4 mr-2"></i>
+                                Add New Member
+                            </button>
+                            <button class="btn-secondary w-full flex items-center justify-center"
+                                onclick="showAddTrainerModal()">
+                                <i data-lucide="user-plus" class="h-4 w-4 mr-2"></i>
+                                Add New Trainer
+                            </button>
+                            <button class="btn-secondary w-full flex items-center justify-center"
+                                onclick="showAddMembershipModal()">
+                                <i data-lucide="plus-circle" class="h-4 w-4 mr-2"></i>
+                                Add membership
+                            </button>
+                            <button class="btn-secondary w-full flex items-center justify-center"
+                                onclick="showAddClassModal()">
+                                <i data-lucide="calendar-plus" class="h-4 w-4 mr-2"></i>
+                                Schedule Class
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                        <div class="space-y-3">
+                            <!-- <div class="flex items-center justify-between py-2">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                    <span class="text-sm text-gray-600">John Doe joined Premium</span>
+                                </div>
+                                <span class="text-xs text-gray-400">2 hours ago</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                                    <span class="text-sm text-gray-600">Morning Yoga class completed</span>
+                                </div>
+                                <span class="text-xs text-gray-400">5 hours ago</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                                    <span class="text-sm text-gray-600">New trainer Sarah Wilson added</span>
+                                </div>
+                                <span class="text-xs text-gray-400">1 day ago</span>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members Page -->
+            <div id="members-page" class="page hidden">
+                <div class="mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Member Management</h2>
+                            <p class="text-gray-600">Quản lý hội viên và gói tập của hội viên.</p>
+                        </div>
+                        <button class="btn-primary mt-4 sm:mt-0" onclick="showAddMemberModal()">
+                            <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                            Add Member
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="relative flex-1 mr-4">
+                            <i data-lucide="search" class="absolute left-3 top-3 h-4 w-4 text-gray-400"></i>
+                            <input type="text" placeholder="Search members..." class="form-input pl-10">
+                        </div>
+                        <select class="form-input w-48">
+                            <option>All Memberships</option>
+                            <option>Premium</option>
+                            <option>Basic</option>
+                            <option>Student</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Membership</th>
+                                <th>Status</th>
+                                <th>Start Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="members-table">
+                            <!-- Members will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trainers Page -->
+            <div id="trainers-page" class="page hidden">
+                <div class="mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Trainer Management</h2>
+                            <p class="text-gray-600">Quản lý huấn luyện viên cá nhân.</p>
+                        </div>
+                        <button class="btn-primary mt-4 sm:mt-0" onclick="showAddTrainerModal()">
+                            <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                            Add Trainer
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="trainers-grid">
+                    <!-- Trainer cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Schedule Page -->
+            <div id="schedule-page" class="page hidden">
+                <div class="mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Class Schedule</h2>
+                            <p class="text-gray-600">Quản lý lịch học và sức chứa lớp học.</p>
+                        </div>
+                        <button class="btn-primary mt-4 sm:mt-0" onclick="showAddClassModal()">
+                            <i data-lucide="calendar-plus" class="w-4 h-4 mr-2"></i>
+                            Add Class
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Class Name</th>
+                                <th>Day</th>
+                                <th>Time</th>
+                                <th>Trainer</th>
+                                <th>Capacity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-table">
+                            <!-- Schedule will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payments Page -->
+            <div id="payments-page" class="page hidden">
+                <div class="mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Payment Management</h2>
+                            <p class="text-gray-600">Theo dõi thanh toán và lập hóa đơn hội viên</p>
+                        </div>
+                        <button class="btn-primary mt-4 sm:mt-0" onclick="showAddPaymentModal()">
+                            <i data-lucide="credit-card" class="w-4 h-4 mr-2"></i>
+                            Record Payment
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Payment Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table">
+                            <!-- Payments will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Membership Page -->
+            <div id="membership-page" class="page hidden">
+                <div class="mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Membership Management</h2>
+                            <p class="text-gray-600">Quản lý gói tập.</p>
+                        </div>
+                        <button class="btn-primary mt-4 sm:mt-0" onclick="showAddMembershipModal()">
+                            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
+                            Add Membership
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="relative flex-1 mr-4">
+                            <i data-lucide="search" class="absolute left-3 top-3 h-4 w-4 text-gray-400"></i>
+                            <input type="text" placeholder="Search memberships..." class="form-input pl-10">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Membership Name</th>
+                                <th>Price</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membership-table">
+                            <!-- Memberships will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+
+        <!-- Add Member Modal -->
+        <div id="add-member-modal" class="modal">
+            <div class="modal-content p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Add New Member</h3>
+                    <button onclick="hideModal('add-member-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="add-member-form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-input" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-input" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Membership Type</label>
+                        <select class="form-input" name="membership" required>
+                            <option value="">Select membership</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Basic">Basic</option>
+                            <option value="Student">Student</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-input" name="startDate" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="btn-secondary"
+                            onclick="hideModal('add-member-modal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Add Member</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Trainer Modal -->
+        <div id="add-trainer-modal" class="modal">
+            <div class="modal-content p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Add New Trainer</h3>
+                    <button onclick="hideModal('add-trainer-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="add-trainer-form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-input" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Specialty</label>
+                        <input type="text" class="form-input" name="specialty" placeholder="e.g., Yoga, HIIT, Pilates"
+                            required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="btn-secondary"
+                            onclick="hideModal('add-trainer-modal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Add Trainer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Class Modal -->
+        <div id="add-class-modal" class="modal">
+            <div class="modal-content p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Schedule New Class</h3>
+                    <button onclick="hideModal('add-class-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="add-class-form">
+                    <div class="form-group">
+                        <label class="form-label">Class Name</label>
+                        <input type="text" class="form-input" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Day</label>
+                        <select class="form-input" name="day" required>
+                            <option value="">Select day</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" class="form-input" name="time" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Trainer</label>
+                        <select class="form-input" name="trainerId" required>
+                            <option value="">Select trainer</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Capacity</label>
+                        <input type="number" class="form-input" name="capacity" min="1" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="btn-secondary"
+                            onclick="hideModal('add-class-modal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Schedule Class</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Payment Modal -->
+        <div id="add-payment-modal" class="modal">
+            <div class="modal-content p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Record Payment</h3>
+                    <button onclick="hideModal('add-payment-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="add-payment-form">
+                    <div class="form-group">
+                        <label class="form-label">Member</label>
+                        <select class="form-input" name="memberId" required>
+                            <option value="">Select member</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-input" name="amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="date" class="form-input" name="dueDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-input" name="status" required>
+                            <option value="">Select status</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="btn-secondary"
+                            onclick="hideModal('add-payment-modal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Record Payment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Membership Modal -->
+        <div id="addMembershipModal"
+            class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Add Membership</h3>
+                <form id="addMembershipForm" class="space-y-4">
+                    <div>
+                        <label class="form-label">Membership Name</label>
+                        <input type="text" id="membershipName" class="form-input w-full" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Price</label>
+                        <input type="number" id="membershipPrice" class="form-input w-full" step="0.01" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Duration (days)</label>
+                        <input type="number" id="membershipDuration" class="form-input w-full" required>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-4">
+                        <button type="button" class="btn-secondary" onclick="closeAddMembershipModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+</body>
+
+</html>

@@ -1,6 +1,12 @@
 Changelog - Gym Management WebApp
 ==================================
 
+
+Version 1.0.3 - 2025-08-10
+--------------------------
+- Sửa mobile menu ở member 
+- Thêm script sql (trainers, classes, ...)
+
 Version 1.0.2 - 2025-07-24
 --------------------------
 - Tạo `api/membership.js` để lấy dữu liệu gói tập

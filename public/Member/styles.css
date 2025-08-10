@@ -59,6 +59,7 @@ body {
     margin: 0 auto;
     padding: 0 1rem;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
 }
@@ -996,7 +997,7 @@ input:checked + .slider:before {
     }
     
     .nav-toggle {
-        display: none;
+        display: flex;
     }
     
     .dashboard-grid {
@@ -1013,6 +1014,10 @@ input:checked + .slider:before {
         grid-template-columns: 1fr;
     }
     
+    .nav-toggle {
+        display: flex;
+    }
+
     .form-row {
         grid-template-columns: 1fr;
     }

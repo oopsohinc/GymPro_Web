@@ -7,6 +7,7 @@
     <title>Modern Gym Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <style>
@@ -144,7 +145,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Active Trainers</p>
-                                <p class="text-2xl font-bold text-gray-900">0</p>
+                                <p id="active-trainers" class="text-2xl font-bold text-gray-900">0</p>
                                 <p class="text-sm text-green-600">+...% from last month</p>
                             </div>
                             <div class="icon-wrapper icon-primary">
@@ -155,8 +156,8 @@
                     <div class="stats-card">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Today's Classes</p>
-                                <p class="text-2xl font-bold text-gray-900">0</p>
+                                <p class="text-sm font-medium text-gray-600">Total Classes</p>
+                                <p id="total-classes" class="text-2xl font-bold text-gray-900">0</p>
                                 <p class="text-sm text-blue-600">... more scheduled</p>
                             </div>
                             <div class="icon-wrapper icon-primary">
@@ -173,6 +174,18 @@
                             </div>
                             <div class="icon-wrapper icon-primary">
                                 <i data-lucide="dollar-sign" class="h-5 w-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Memberships</p>
+                                <p id="total-memberships" class="text-2xl font-bold text-gray-900">0</p>
+                                <p class="text-sm text-green-600">+... from last month</p>
+                            </div>
+                            <div class="icon-wrapper icon-primary">
+                                <i data-lucide="package-2" class="h-5 w-5"></i>
                             </div>
                         </div>
                     </div>
@@ -469,21 +482,43 @@
                 <form id="add-trainer-form">
                     <div class="form-group">
                         <label class="form-label">Full Name</label>
-                        <input type="text" class="form-input" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" name="email" required>
+                        <input type="text" id="trainerName" class="form-input" name="name" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Specialty</label>
-                        <input type="text" class="form-input" name="specialty" placeholder="e.g., Yoga, HIIT, Pilates"
-                            required>
+                        <input type="text" id="trainerSpecialty" class="form-input" name="specialty"
+                            placeholder="e.g., Yoga, HIIT, Pilates" required>
                     </div>
                     <div class="flex justify-end space-x-3">
                         <button type="button" class="btn-secondary"
                             onclick="hideModal('add-trainer-modal')">Cancel</button>
                         <button type="submit" class="btn-primary">Add Trainer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="edit-trainer-modal" class="modal">
+            <div class="modal-content p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Edit Trainer</h3>
+                    <button onclick="hideModal('edit-trainer-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="edit-trainer-form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="editTrainerName" class="form-input" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Specialty</label>
+                        <input type="text" id="editTrainerSpecialty" class="form-input" name="specialty"
+                            placeholder="e.g., Yoga, HIIT, Pilates" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="btn-secondary"
+                            onclick="hideModal('edit-trainer-modal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -505,16 +540,16 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Day</label>
-                        <select class="form-input" name="day" required>
-                            <option value="">Select day</option>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                            <option value="Sunday">Sunday</option>
-                        </select>
+                        <input list="days" class="form-input" name="day" required>
+                        <datalist id="days">
+                            <option value="Monday">
+                            <option value="Tuesday">
+                            <option value="Wednesday">
+                            <option value="Thursday">
+                            <option value="Friday">
+                            <option value="Saturday">
+                            <option value="Sunday">
+                        </datalist>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Time</label>
@@ -522,10 +557,19 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Trainer</label>
-                        <select class="form-input" name="trainerId" required>
+                        <input list="trainers" class="form-input" name="trainerId" placeholder="Enter trainer" required>
+                        <datalist id="trainers">
                             <option value="">Select trainer</option>
-                            <!-- Options will be populated dynamically -->
-                        </select>
+
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level</label>
+                        <input list="levels" class="form-input" name="levelId" placeholder="Enter level" required>
+                        <datalist id="levels">
+                            <option value="">Select level</option>
+                            
+                        </datalist>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Capacity</label>
@@ -535,6 +579,64 @@
                         <button type="button" class="btn-secondary"
                             onclick="hideModal('add-class-modal')">Cancel</button>
                         <button type="submit" class="btn-primary">Schedule Class</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="edit-class-modal" class="modal">
+            <div class="modal-content p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Edit Class</h3>
+                    <button onclick="hideModal('edit-class-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="edit-class-form">
+                    <div class="form-group">
+                        <label class="form-label">Class Name</label>
+                        <input type="text" class="form-input" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Day</label>
+                        <input list="days" class="form-input" name="schedule">
+                        <datalist id="days">
+                            <option value="Monday">
+                            <option value="Tuesday">
+                            <option value="Wednesday">
+                            <option value="Thursday">
+                            <option value="Friday">
+                            <option value="Saturday">
+                            <option value="Sunday">
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" class="form-input" name="time">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Trainer</label>
+                        <input list="trainers" class="form-input" name="trainerId" placeholder="Enter trainer">
+                        <datalist id="trainers">
+                            <option value="">Select trainer</option>
+
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level</label>
+                        <input list="levels" class="form-input" name="levelId" placeholder="Enter level">
+                        <datalist id="levels">
+                            <option value="">Select level</option>
+                            
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Capacity</label>
+                        <input type="number" class="form-input" name="max_capacity" min="1">
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" class="btn-secondary"
+                            onclick="hideModal('edit-class-modal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -608,7 +710,30 @@
                 </form>
             </div>
         </div>
-    </div>
+        <div id="editMembershipModal"
+            class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Edit Membership</h3>
+                <form id="editMembershipForm" class="space-y-4">
+                    <div>
+                        <label class="form-label">Membership Name</label>
+                        <input type="text" id="editMembershipName" class="form-input w-full" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Price</label>
+                        <input type="number" id="editMembershipPrice" class="form-input w-full" step="0.01" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Duration (days)</label>
+                        <input type="number" id="editMembershipDuration" class="form-input w-full" required>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-4">
+                        <button type="button" class="btn-secondary" onclick="hideModal('editMembershipModal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
     <script src="../js/script.js"></script>
 </body>

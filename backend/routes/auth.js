@@ -16,7 +16,8 @@ router.post('/login', async (req, res) => {
             const user = result.recordset[0];
             res.json({
                 success: true,
-                role: user.role // 'chuphong' hoặc 'member'
+                role: user.role, // 'chuphong' hoặc 'member'
+                id: user.id
             });
         } else {
             res.status(401).json({ success: false, message: 'Sai tài khoản hoặc mật khẩu' });

@@ -206,6 +206,7 @@ Dự án được phát triển bởi **ophnc**.
 ## 📞 Liên hệ
 
 - **Author**: ophnc
+- **Email**: viethong.261004@gmail.com
 - **Project**: GymPro Web Management System
 - **Version**: 1.1.0
 

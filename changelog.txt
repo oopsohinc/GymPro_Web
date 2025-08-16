@@ -1,6 +1,11 @@
 Changelog - Gym Management WebApp
 ==================================
 
+Version 1.1.0 - 2025-08-16
+--------------------------
+- Hoàn thiện phần chủ phòng ngoại trừ (chỉnh sửa member, xóa member và phần payment)
+- Tạo chuyển hướng đến phân vùng member (đã lấy thông tin cá nhân của member)
+- Thêm script sql mới
 
 Version 1.0.3 - 2025-08-10
 --------------------------

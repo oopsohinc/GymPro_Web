@@ -611,31 +611,52 @@ function confirmBooking() {
 }
 
 // Profile Functions
+const params = new URLSearchParams(window.location.search);
+const userId = params.get("id");
+
 function loadProfile() {
-    loadProfileData();
+    loadProfileData(userId);
 }
 
-function loadProfileData() {
-    const user = mockData.user;
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown';
     
-    // Update form fields
-    $('#firstName').value = user.firstName;
-    $('#lastName').value = user.lastName;
-    $('#email').value = user.email;
-    $('#phone').value = user.phone;
-    $('#birthDate').value = user.birthDate;
-    $('#emergencyContact').value = user.emergencyContact;
-    $('#fitnessGoals').value = user.fitnessGoals;
-    
-    // Update preferences
-    $('#emailNotifications').checked = user.emailNotifications;
-    $('#smsReminders').checked = user.smsReminders;
-    $('#classReminders').checked = user.classReminders;
-    
-    // Update profile summary
-    $('#avatar-initials').textContent = user.firstName[0] + user.lastName[0];
-    $('#profile-name').textContent = `${user.firstName} ${user.lastName}`;
-    $('#profile-membership').textContent = `${user.currentPlan} Member`;
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+async function loadProfileData(userId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/members/${userId}`);
+        if (!response.ok) throw new Error("Failed to fetch profile data");
+        const user = await response.json();
+        console.log(user);
+
+        // Update form fields
+        $('#fullName').value = user.full_name;
+        $('#email').value = user.email;
+        $('#phone').value = user.phone;
+        $('#fitnessGoals').value = user.description;
+
+        // Update preferences
+        // $('#emailNotifications').checked = user.emailNotifications;
+        // $('#smsReminders').checked = user.smsReminders;
+        // $('#classReminders').checked = user.classReminders;
+
+        // Update profile summary
+        $('#avatar-initials').textContent = user.full_name[0];
+        $('#profile-name').textContent = user.full_name;
+        $('#profile-membership').textContent = `${user.membership} Member`;
+        $('#enrolled-classes').textContent = user.enrolled || 0;
+        $('#member-since').textContent = formatDate(user.date_created);
+
+    } catch (error) {
+        console.error('Error loading profile data:', error.message);
+    }
 }
 
 function saveProfile(event) {

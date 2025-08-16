@@ -23,7 +23,27 @@ router.get('/members/:id', async (req, res) => {
 
     const result = await pool.request()
       .input('id', sql.Int, id)
-      .query('SELECT * FROM Members WHERE id = @id');
+      .query(`
+        SELECT 
+          m.user_id as id,
+          m.full_name,
+          m.email,
+          m.phone,
+          m.description,
+          m.date_created,
+          ISNULL(ms.name, 'No Membership') as membership,
+          ISNULL(class_count.enrolled, 0) as enrolled
+        FROM Members m
+        LEFT JOIN Member_Memberships mm ON m.user_id = mm.user_id 
+        LEFT JOIN Memberships ms ON mm.membership_id = ms.membership_id
+        LEFT JOIN(
+          SELECT user_id, COUNT(*) as enrolled 
+          FROM Member_Classes 
+          GROUP BY user_id
+        ) class_count ON m.user_id = class_count.user_id
+        WHERE m.user_id = @id
+        ORDER BY m.user_id;
+    `);
 
     if (result.recordset.length > 0) {
       res.json(result.recordset[0]);

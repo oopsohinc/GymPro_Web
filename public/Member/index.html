@@ -246,12 +246,12 @@
                                 <form id="profile-form" class="profile-form">
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="firstName">First Name</label>
-                                            <input type="text" id="firstName" name="firstName" required>
+                                            <label for="fullName">Tên</label>
+                                            <input type="text" id="fullName" name="fullName" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="lastName">Last Name</label>
-                                            <input type="text" id="lastName" name="lastName" required>
+                                            <label for="phone">Số điện thoại</label>
+                                            <input type="tel" id="phone" name="phone">
                                         </div>
                                     </div>
                                     
@@ -260,30 +260,15 @@
                                         <input type="email" id="email" name="email" required>
                                     </div>
                                     
+
                                     <div class="form-group">
-                                        <label for="phone">Phone Number</label>
-                                        <input type="tel" id="phone" name="phone">
-                                    </div>
-                                    
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="birthDate">Date of Birth</label>
-                                            <input type="date" id="birthDate" name="birthDate">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="emergencyContact">Emergency Contact</label>
-                                            <input type="tel" id="emergencyContact" name="emergencyContact">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="fitnessGoals">Fitness Goals</label>
-                                        <textarea id="fitnessGoals" name="fitnessGoals" rows="3" placeholder="Describe your fitness goals..."></textarea>
+                                        <label for="fitnessGoals">Mục tiêu tập luyện</label>
+                                        <textarea id="fitnessGoals" name="fitnessGoals" rows="3" placeholder="Mô tả mục tiêu tập luyện của bạn..."></textarea>
                                     </div>
                                     
                                     <div class="form-actions">
-                                        <button type="submit" class="btn-primary">Save Changes</button>
-                                        <button type="button" class="btn-secondary" onclick="loadProfileData()">Cancel</button>
+                                        <button type="submit" class="btn-primary">Lưu thay đổi</button>
+                                        <button type="button" class="btn-secondary" onclick="loadProfileData()">Hủy</button>
                                     </div>
                                 </form>
                             </div>
@@ -296,24 +281,20 @@
                             <div class="card-content">
                                 <div class="profile-avatar">
                                     <div class="avatar-circle">
-                                        <span id="avatar-initials">JS</span>
+                                        <span id="avatar-initials"></span>
                                     </div>
-                                    <h3 id="profile-name">John Smith</h3>
-                                    <p id="profile-membership">Premium Member</p>
+                                    <h3 id="profile-name"></h3>
+                                    <p id="profile-membership"></p>
                                 </div>
                                 
                                 <div class="profile-stats">
                                     <div class="stat-item">
                                         <span class="stat-label">Member Since</span>
-                                        <span class="stat-value">Jan 2023</span>
+                                        <span class="stat-value" id="member-since"></span>
                                     </div>
                                     <div class="stat-item">
                                         <span class="stat-label">Classes Attended</span>
-                                        <span class="stat-value">127</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-label">Current Streak</span>
-                                        <span class="stat-value">12 days</span>
+                                        <span class="stat-value" id="enrolled-classes">0</span>
                                     </div>
                                 </div>
                             </div>

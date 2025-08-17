@@ -666,7 +666,7 @@ function formatDate(dateString) {
     if (!dateString) return 'Unknown';
     
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
+    return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'

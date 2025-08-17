@@ -53,45 +53,53 @@ async function checkServerStatus() {
     }
 }
 
-// async function login(username, password) {
-//     const serverRunning = await checkServerStatus();
-//     if (!serverRunning) {
-//         alert("Server chưa được khởi động. Vui lòng khởi động server trước khi đăng nhập.");
-//         return;
-//     }
+async function loginMember(username, password) {
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const usernameError = document.getElementById("username-error");
+    const passwordError = document.getElementById("password-error");
 
-//     try {
-//         const res = await fetch("http://localhost:3000/api/login", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({ username, password })
-//         });
+    // Reset lỗi
+    usernameInput.classList.remove("error");
+    passwordInput.classList.remove("error");
+    usernameError.style.display = "none";
+    passwordError.style.display = "none";
 
-//         const data = await res.json();
+    const serverRunning = await checkServerStatus();
+    if (!serverRunning) {
+        passwordError.textContent = "Server chưa được khởi động.";
+        passwordInput.classList.add("error");
+        passwordError.style.display = "block";
+        return;
+    }
 
-//         if (data.success) {
-//             if (data.role === "chuphong") {
-//                 window.location.href = "html/index.html";
-//             } else if (data.role === "member") {
-//                 window.location.href = "member.html";
-//             }
-//         } else {
-//             alert(data.message || "Sai tài khoản hoặc mật khẩu");
-//         }
-//     } catch (error) {
-//         console.error("Error during login:", error);
-//         alert("Có lỗi xảy ra. Vui lòng thử lại.");
-//     }
-// }
+    try {
+        const res = await fetch("http://localhost:3000/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
 
-// document.getElementById("owner-tab").addEventListener("submit", async function (e) {
-//     e.preventDefault();
-//     const username = document.getElementById("username").value;
-//     const password = document.getElementById("password").value;
-//     await login(username, password);
-// });
+        const data = await res.json();
 
-async function login(username, password) {
+        if (data.success) {
+            if (data.role === "member") {
+                window.location.href = `Member/index.html?id=${data.id}`;
+            }
+        } else {
+            passwordInput.classList.add("error");
+            passwordError.textContent = data.message || "Sai tài khoản hoặc mật khẩu";
+            passwordError.style.display = "block";
+        }
+    } catch (error) {
+        passwordInput.classList.add("error");
+        passwordError.textContent = "Có lỗi xảy ra. Vui lòng thử lại.";
+        passwordError.style.display = "block";
+        console.error("Error during login:", error);
+    }
+}
+
+async function loginOwner(username, password) {
     const usernameInput = document.getElementById("username");
     const passwordInput = document.getElementById("password");
     const usernameError = document.getElementById("username-error");
@@ -123,8 +131,6 @@ async function login(username, password) {
         if (data.success) {
             if (data.role === "chuphong") {
                 window.location.href = "html/index.html";
-            } else if (data.role === "member") {
-                window.location.href = `Member/index.html?id=${data.id}`;
             }
         } else {
             passwordInput.classList.add("error");
@@ -143,12 +149,12 @@ document.getElementById("owner-tab").addEventListener("submit", async function (
     e.preventDefault();
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    await login(username, password);
+    await loginOwner(username, password);
 });
 
 document.getElementById("member-tab").addEventListener("submit", async function (e) {
     e.preventDefault();
     const username = document.getElementById("usernameMember").value;
     const password = document.getElementById("passwordMember").value;
-    await login(username, password);
+    await loginMember(username, password);
 });

@@ -1071,12 +1071,15 @@ async function loadScheduleTable() {
         classes.forEach(classItem => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                 <td class="font-medium text-gray-900">${classItem.name}</td>
+                <td class="tooltip">
+                    <span class="tooltip-text">${classItem.name || 'N/A'}</span>
+                    <span class="tooltip-description">${classItem.description || 'N/A'}</span>
+                </td>
                 <td>${classItem.schedule || 'N/A'}</td>
                 <td>${formatTime(classItem.time)}</td>
-                <td>${classItem.full_name}</td>
-                <td>${classItem.capacity}/${classItem.max_capacity}</td>
-                <td><span class="badge badge-pill badge-${getBadgeClass(classItem.level_name)}">${classItem.level_name}</span></td>
+                <td>${classItem.full_name || 'N/A'}</td>
+                <td>${classItem.capacity || '0'}/${classItem.max_capacity || '0'}</td>
+                <td><span class="badge badge-pill badge-${getBadgeClass(classItem.level_name)}">${classItem.level_name || 'N/A'}</span></td>
                 <td>
                     <button class="btn-secondary text-blue-600 hover:underline mr-2" onclick="editClass(${classItem.class_id})">Edit</button>
                     <button class="btn-secondary text-red-600 hover:underline" onclick="deleteClass(${classItem.class_id})">Delete</button>

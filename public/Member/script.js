@@ -609,7 +609,14 @@ function confirmBooking() {
         }
     }, 1500);
 }
-
+// Modal overlay click to close
+    const logoutLink = document.getElementById('logout-link');
+if (logoutLink) {
+    logoutLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = '/login.html';
+    });
+}
 // Profile Functions
 const params = new URLSearchParams(window.location.search);
 const userId = params.get("id");

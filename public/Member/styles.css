@@ -740,6 +740,16 @@ body {
     font-weight: 600;
     color: rgb(var(--foreground));
 }
+.menu-divider {
+    border-top: 1px solid #e0e0e0;
+    margin: 12px 0;
+}
+.logout-link {
+    color: #e53935 !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
 
 /* Preferences */
 .preferences {

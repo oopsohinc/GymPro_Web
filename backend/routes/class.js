@@ -7,7 +7,7 @@ const config = require('../db');
 router.get('/classes', async (req, res) => {
   try {
     const pool = await sql.connect(config);
-    const result = await pool.request().query('SELECT Classes.class_id, Classes.name, Classes.schedule, Classes.time, Classes.capacity,' +
+    const result = await pool.request().query('SELECT Classes.class_id, Classes.name, Classes.description, Classes.schedule, Classes.time, Classes.capacity,' +
       'Classes.max_capacity, Trainers.trainer_id, Trainers.full_name, Levels.*' +
       'FROM Classes JOIN Levels ON Classes.level_id = Levels.level_id JOIN' +
       ' Trainers ON Classes.trainer_id = Trainers.trainer_id');
@@ -85,6 +85,7 @@ router.put('/classes/:id', async (req, res) => {
     const request = pool.request().input('id', sql.Int, id);
     const fieldConfig = [
       { key: 'name', type: sql.NVarChar },
+      { key: 'description', type: sql.NVarChar },
       { key: 'schedule', type: sql.NVarChar },
       { key: 'time', type: sql.Time },
       { key: 'capacity', type: sql.Int },

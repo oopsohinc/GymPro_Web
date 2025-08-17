@@ -600,13 +600,13 @@ function confirmBooking() {
             }
         }
         // Thêm lịch vào bảng Schedule
-    addScheduleRow(
+        addScheduleRow(
         selectedClass.name,
+        selectedSchedule.date,
         selectedSchedule.time,
-        // Lấy tên huấn luyện viên từ mockData.trainers
         (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
         "Đã đăng ký"
-    );
+        );
         showToast('Success', 'Class booked successfully!');
         closeModal('class-booking-modal');
         
@@ -617,17 +617,35 @@ function confirmBooking() {
     }, 1500);
 }
 // Schedule function
-function addScheduleRow(className, time, trainer, status = "Đã đăng ký") {
+function addScheduleRow(className, date, time, trainer, status = "Đã đăng ký") {
     const tbody = document.getElementById('schedule-body');
     if (!tbody) return;
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td>${className}</td>
+        <td>${formatScheduleDate(date)}</td>
         <td>${time}</td>
         <td>${trainer}</td>
         <td>${status}</td>
     `;
     tbody.appendChild(tr);
+}
+
+// Hàm chuyển đổi thứ/ngày
+function formatScheduleDate(dateStr) {
+    if (dateStr === 'today') return 'Hôm nay';
+    if (dateStr === 'tomorrow') return 'Ngày mai';
+    // Nếu là thứ tiếng Anh, chuyển sang tiếng Việt hoặc giữ nguyên
+    const days = {
+        monday: 'Thứ 2',
+        tuesday: 'Thứ 3',
+        wednesday: 'Thứ 4',
+        thursday: 'Thứ 5',
+        friday: 'Thứ 6',
+        saturday: 'Thứ 7',
+        sunday: 'Chủ nhật'
+    };
+    return days[dateStr.toLowerCase()] || dateStr;
 }
 // Modal overlay click to close
     const logoutLink = document.getElementById('logout-link');

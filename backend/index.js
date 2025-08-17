@@ -43,3 +43,6 @@ app.use('/api', memberRoutes);
 
 const classRoutes = require('./routes/class');
 app.use('/api', classRoutes);
+
+const paymentRoutes = require('./routes/payment');
+app.use('/api', paymentRoutes);

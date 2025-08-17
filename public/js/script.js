@@ -1,3 +1,4 @@
+
 // Dữ liệu giả lập cho hệ thống quản lý phòng tập
 const mockData = {
     members: [
@@ -459,34 +460,6 @@ function showWIP(id) {
 //     });
 // }
 
-function loadPaymentsTable() {
-    const tbody = document.getElementById('payments-table');
-    tbody.innerHTML = '';
-
-    mockData.payments.forEach(payment => {
-        const row = document.createElement('tr');
-        const statusBadge = payment.status === 'Paid' ? 'badge-success' :
-            payment.status === 'Pending' ? 'badge-warning' : 'badge-error';
-        row.innerHTML = `
-            <td>
-                <div class="flex items-center">
-                    <img src="${payment.memberAvatar}" alt="${payment.memberName}" class="w-10 h-10 rounded-full mr-3">
-                    <div class="font-medium text-gray-900">${payment.memberName}</div>
-                </div>
-            </td>
-            <td class="font-medium">$${payment.amount}</td>
-            <td>${payment.dueDate}</td>
-            <td><span class="badge ${statusBadge}">${payment.status}</span></td>
-            <td>${payment.paymentDate || '-'}</td>
-            <td>
-                <button class="btn-secondary mr-2">Edit</button>
-                <button class="btn-secondary">Delete</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
 // Xử lý gửi form
 function setupFormHandlers() {
     document.getElementById('add-member-form').addEventListener('submit', function (e) {
@@ -768,6 +741,7 @@ function initializeApp() {
     loadMemberships();
     loadTrainers();
     loadScheduleTable();
+    loadPaymentsTable();
 }
 
 async function loadStats() {
@@ -1089,6 +1063,60 @@ async function loadScheduleTable() {
         });
     } catch (err) {
         console.error("Error loading classes:", err);
+    }
+}
+
+// Load payment
+function formatDateUTC(isoString) {
+  if (!isoString) return '—'; // xử lý giá trị null hoặc undefined
+
+  const date = new Date(isoString);
+  if (isNaN(date)) return 'Invalid Date';
+
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
+
+  return `${day}-${month}-${year}`;
+}
+
+
+async function loadPaymentsTable() {
+    try {
+        const res = await fetch("http://localhost:3000/api/payments");
+        const payments = await res.json();
+
+        const tbody = document.getElementById('payments-table');
+        tbody.innerHTML = '';
+
+        payments.forEach(payment => {
+            const formattedDate = formatDateUTC(payment.payment_date);
+            const row = document.createElement('tr');
+            const statusBadge = payment.status === 'Paid' ? 'badge-success' :
+                payment.status === 'Pending' ? 'badge-warning' : 'badge-error';
+            row.innerHTML = `
+                <td>
+                    <div class="flex items-center">
+                        <div class="font-medium text-gray-900">${payment.full_name}</div>
+                    </div>
+                </td>
+                <td class="font-medium">${payment.amount.toLocaleString('vi-VN')}₫</td>
+                <td>${payment.dueDate}</td>
+                <td>
+                    <span class="${payment.payment_status === true ? 'badge badge-success' : 'badge badge-error'}">
+                        ${payment.payment_status === true ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                    </span>
+                </td>
+                <td>${formattedDate || '-'}</td>
+                <td>
+                    <button class="btn-secondary mr-2">Edit</button>
+                    <button class="btn-secondary">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (err) {
+        console.error("Error loading payments:", err);
     }
 }
 

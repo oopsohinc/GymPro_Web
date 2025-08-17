@@ -67,7 +67,7 @@ npm install
 #### Tạo database SQL Server
 1. Mở SQL Server Management Studio
 2. Tạo database mới tên `GymProDB`
-3. Chạy các script SQL theo thứ tự:
+3. Chạy script SQL mới nhất:
    - `databases/script_2025-07-22.sql`
    - `databases/script_2025-07-26.sql`
    - `databases/script_2025-08-10.sql`

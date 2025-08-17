@@ -599,7 +599,14 @@ function confirmBooking() {
                 todayClass.isBooked = true;
             }
         }
-        
+        // Thêm lịch vào bảng Schedule
+        addScheduleRow(
+        selectedClass.name,
+        selectedSchedule.date,
+        selectedSchedule.time,
+        (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
+        "Registered"
+        );
         showToast('Success', 'Class booked successfully!');
         closeModal('class-booking-modal');
         
@@ -609,7 +616,44 @@ function confirmBooking() {
         }
     }, 1500);
 }
+// Schedule function
+function addScheduleRow(className, date, time, trainer, status = "Registered") {
+    const tbody = document.getElementById('schedule-body');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${className}</td>
+        <td>${formatScheduleDate(date)}</td>
+        <td>${time}</td>
+        <td>${trainer}</td>
+        <td>${status}</td>
+    `;
+    tbody.appendChild(tr);
+}
 
+// Hàm chuyển đổi thứ/ngày
+function formatScheduleDate(dateStr) {
+    if (dateStr === 'today') return 'Today';
+    if (dateStr === 'tomorrow') return 'Tomorrow';
+    const days = {
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+        sunday: 'Sunday'
+    };
+    return days[dateStr.toLowerCase()] || dateStr;
+}
+// Modal overlay click to close
+    const logoutLink = document.getElementById('logout-link');
+if (logoutLink) {
+    logoutLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = '/login.html';
+    });
+}
 // Profile Functions
 const params = new URLSearchParams(window.location.search);
 const userId = params.get("id");
@@ -622,7 +666,7 @@ function formatDate(dateString) {
     if (!dateString) return 'Unknown';
     
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
+    return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'

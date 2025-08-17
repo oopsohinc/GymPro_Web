@@ -30,7 +30,9 @@
                     <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                     <a href="#" class="nav-link" data-page="memberships">Memberships</a>
                     <a href="#" class="nav-link" data-page="classes">Classes</a>
-                    <a href="#" class="nav-link" data-page="profile">Profile</a>
+                    <a href="#" class="nav-link" data-page="schedule">Schedule</a>
+                    <a href="#" class="nav-link" data-page="progress">Progress</a>
+                    <a href="#" class="nav-link" data-page="profile">Profile</a>                  
                 </nav>
 
                 <!-- Mobile menu button -->
@@ -51,7 +53,7 @@
                     <div class="logo">
                         <i data-lucide="dumbbell" class="logo-icon"></i>
                         <span class="logo-text">GymPro</span>
-                    </div>
+                    </div>                  
                     <button id="close-menu-button">
                         <i data-lucide="x"></i>
                     </button>
@@ -60,7 +62,14 @@
                     <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                     <a href="#" class="nav-link" data-page="memberships">Memberships</a>
                     <a href="#" class="nav-link" data-page="classes">Classes</a>
-                    <a href="#" class="nav-link" data-page="profile">Profile</a>
+                    <a href="#" class="nav-link" data-page="schedule">Schedule</a>
+                    <a href="#" class="nav-link" data-page="progress">Progress</a>
+                    <a href="#" class="nav-link" data-page="profile">Profile</a>                    
+                    <!-- Thêm nút Đăng xuất -->
+                    <div class="menu-divider"></div>
+                    <a href="#" class="nav-link logout-link" id="logout-link">                       
+                        <span>Đăng xuất</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -227,7 +236,29 @@
                     <!-- Classes will be populated by JavaScript -->
                 </div>
             </div>
-
+            <!-- Schedule Page -->
+            <div id="schedule-page" class="page">
+                <div class="page-header">
+                    <h1>Your schedule</h1>
+                    <p>View your registered classes and workout schedule.</p>
+                </div>
+                <div class="schedule-section">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Day/date</th>
+                                <th>Time</th>
+                                <th>Trainer</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-body">
+                            <!-- Các dòng sẽ được thêm bằng JavaScript sau khi book class -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <!-- Profile Page -->
             <div id="profile-page" class="page">
                 <div class="page-header">
@@ -246,11 +277,11 @@
                                 <form id="profile-form" class="profile-form">
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="fullName">Tên</label>
+                                            <label for="fullName">Full Name</label>
                                             <input type="text" id="fullName" name="fullName" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="phone">Số điện thoại</label>
+                                            <label for="phone">Phone Number</label>
                                             <input type="tel" id="phone" name="phone">
                                         </div>
                                     </div>
@@ -262,13 +293,13 @@
                                     
 
                                     <div class="form-group">
-                                        <label for="fitnessGoals">Mục tiêu tập luyện</label>
+                                        <label for="fitnessGoals">Fitness Goals</label>
                                         <textarea id="fitnessGoals" name="fitnessGoals" rows="3" placeholder="Mô tả mục tiêu tập luyện của bạn..."></textarea>
                                     </div>
                                     
                                     <div class="form-actions">
-                                        <button type="submit" class="btn-primary">Lưu thay đổi</button>
-                                        <button type="button" class="btn-secondary" onclick="loadProfileData()">Hủy</button>
+                                        <button type="submit" class="btn-primary">Save</button>
+                                        <button type="button" class="btn-secondary" onclick="loadProfileData()">Cancel</button>
                                     </div>
                                 </form>
                             </div>
@@ -333,6 +364,99 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- Track Progress Page -->
+            <div id="progress-page" class="page">
+                <div class="page-header">
+                    <h1>Track Progress</h1>
+                    <p>Track your workout progress and achievements here.</p>
+                </div>
+            <div class="progress-circles">
+                <!-- Vòng tròn 1 -->
+            <div class="progress-circle">
+                <div class="progress-svg-wrapper">
+                    <svg width="160" height="160">
+                        <circle cx="80" cy="80" r="70" stroke="#e0e0e0" stroke-width="12" fill="none"/>
+                        <circle
+                            cx="80" cy="80" r="70"
+                            stroke="#4f46e5"
+                            stroke-width="12"
+                            fill="none"
+                            stroke-dasharray="439.6"
+                            stroke-dashoffset="43.96"
+                            stroke-linecap="round"
+                            transform="rotate(-90 80 80)"
+                        />
+                    </svg>
+                    <div class="progress-value">90%</div>
+                </div>
+                <div class="progress-label in-progress">Practicing</div>
+                <div class="progress-class">Yoga</div>
+            </div>
+            <!-- Vòng tròn 2 -->
+            <div class="progress-circle">
+                <div class="progress-svg-wrapper">
+                    <svg width="160" height="160">
+                        <circle cx="80" cy="80" r="70" stroke="#e0e0e0" stroke-width="12" fill="none"/>
+                        <circle
+                            cx="80" cy="80" r="70"
+                            stroke="#22c55e"
+                            stroke-width="12"
+                            fill="none"
+                            stroke-dasharray="439.6"
+                            stroke-dashoffset="0"
+                            stroke-linecap="round"
+                            transform="rotate(-90 80 80)"
+                        />
+                    </svg>
+                    <div class="progress-value">100%</div>
+                </div>
+                <div class="progress-label complete">Complete</div>
+                <div class="progress-class">HIIT</div>
+            </div>
+            <!-- Vòng tròn 3 -->
+            <div class="progress-circle">
+                <div class="progress-svg-wrapper">
+                    <svg width="160" height="160">
+                        <circle cx="80" cy="80" r="70" stroke="#e0e0e0" stroke-width="12" fill="none"/>
+                        <circle
+                            cx="80" cy="80" r="70"
+                            stroke="#f59e42"
+                            stroke-width="12"
+                            fill="none"
+                            stroke-dasharray="439.6"
+                            stroke-dashoffset="87.92"
+                            stroke-linecap="round"
+                            transform="rotate(-90 80 80)"
+                        />
+                    </svg>
+                    <div class="progress-value">80%</div>
+                </div>
+                <div class="progress-label in-progress">Practicing</div>
+                <div class="progress-class">Strength</div>
+            </div>
+            <!-- Vòng tròn 4 -->
+            <div class="progress-circle">
+                <div class="progress-svg-wrapper">
+                    <svg width="160" height="160">
+                        <circle cx="80" cy="80" r="70" stroke="#e0e0e0" stroke-width="12" fill="none"/>
+                        <circle
+                            cx="80" cy="80" r="70"
+                            stroke="#06b6d4"
+                            stroke-width="12"
+                            fill="none"
+                            stroke-dasharray="439.6"
+                            stroke-dashoffset="219.8"
+                            stroke-linecap="round"
+                            transform="rotate(-90 80 80)"
+                        />
+                    </svg>
+                    <div class="progress-value">50%</div>
+                </div>
+                <div class="progress-label in-progress">Practicing</div>
+                <div class="progress-class">Cardio</div>
+            </div>
+            </div>
             </div>
         </main>
     </div>

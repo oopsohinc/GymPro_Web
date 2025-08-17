@@ -41,7 +41,30 @@ function closeRegister() {
     registerSection.classList.add('hidden'); // Ẩn form đăng ký
     overlay.classList.add('hidden'); // Ẩn overlay
 }
+// Hàm xử lý đăng ký 
+function handleRegister() {
+    const fullName = document.getElementById('registerFullName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value.trim();
 
+    if (!fullName || !email || !password) {
+        document.getElementById('register-message').textContent = "Vui lòng nhập đầy đủ thông tin.";
+        document.getElementById('register-message').style.display = "block";
+        return;
+    }
+
+    // Hiển thị bảng thông báo thành công
+    document.getElementById('register-success-modal').style.display = "flex";
+}
+
+function closeRegisterSuccess() {
+    document.getElementById('register-success-modal').style.display = "none";
+    document.getElementById('register-section').classList.add('hidden');
+    document.getElementById('member-tab').classList.remove('hidden');
+    // Ẩn overlay nếu có
+    const overlay = document.getElementById('overlay');
+    if (overlay) overlay.classList.add('hidden');
+}
 async function checkServerStatus() {
     try {
         const res = await fetch("http://localhost:3000/api/login", {

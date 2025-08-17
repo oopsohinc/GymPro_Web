@@ -750,7 +750,54 @@ body {
     align-items: center;
     gap: 8px;
 }
-
+.progress-circles {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+.progress-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+    margin-bottom: 2rem;
+}
+.progress-svg-wrapper {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.progress-value {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #333;
+    pointer-events: none;
+}
+.progress-label {
+    margin-top: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.progress-label.complete {
+    color: #2e17f9; /* xanh lá */
+}
+.progress-label.in-progress {
+    color: #f51915; /* đỏ */
+}
+.progress-class {
+    margin-top: 4px;
+    font-size: 1rem;
+    color: #323232;
+}
 /* Preferences */
 .preferences {
     display: flex;

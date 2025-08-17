@@ -605,7 +605,7 @@ function confirmBooking() {
         selectedSchedule.date,
         selectedSchedule.time,
         (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
-        "Đã đăng ký"
+        "Registered"
         );
         showToast('Success', 'Class booked successfully!');
         closeModal('class-booking-modal');
@@ -617,7 +617,7 @@ function confirmBooking() {
     }, 1500);
 }
 // Schedule function
-function addScheduleRow(className, date, time, trainer, status = "Đã đăng ký") {
+function addScheduleRow(className, date, time, trainer, status = "Registered") {
     const tbody = document.getElementById('schedule-body');
     if (!tbody) return;
     const tr = document.createElement('tr');
@@ -633,17 +633,16 @@ function addScheduleRow(className, date, time, trainer, status = "Đã đăng k�
 
 // Hàm chuyển đổi thứ/ngày
 function formatScheduleDate(dateStr) {
-    if (dateStr === 'today') return 'Hôm nay';
-    if (dateStr === 'tomorrow') return 'Ngày mai';
-    // Nếu là thứ tiếng Anh, chuyển sang tiếng Việt hoặc giữ nguyên
+    if (dateStr === 'today') return 'Today';
+    if (dateStr === 'tomorrow') return 'Tomorrow';
     const days = {
-        monday: 'Thứ 2',
-        tuesday: 'Thứ 3',
-        wednesday: 'Thứ 4',
-        thursday: 'Thứ 5',
-        friday: 'Thứ 6',
-        saturday: 'Thứ 7',
-        sunday: 'Chủ nhật'
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+        sunday: 'Sunday'
     };
     return days[dateStr.toLowerCase()] || dateStr;
 }

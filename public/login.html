@@ -177,20 +177,28 @@
     <button class="close-btn" onclick="closeRegister()">×</button>
     <h3 class="text-sm font-semibold mb-2">Đăng ký tài khoản mới</h3>
     <div class="form-group">
-      <label class="form-label">Họ tên</label>
-      <input type="text" class="form-input" placeholder="Nguyễn Văn A" />
+        <label class="form-label">Họ tên</label>
+        <input type="text" class="form-input" id="registerFullName" placeholder="Your FullName" />
     </div>
     <div class="form-group">
-      <label class="form-label">Email</label>
-      <input type="email" class="form-input" placeholder="newuser@example.com" />
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="registerEmail" placeholder="newuser@example.com" />
     </div>
     <div class="form-group">
-      <label class="form-label">Mật khẩu</label>
-      <input type="password" class="form-input" placeholder="••••••••" />
+        <label class="form-label">Mật khẩu</label>
+        <input type="password" class="form-input" id="registerPassword" placeholder="••••••••" />
     </div>
-    <button class="btn-secondary w-full mt-4">Đăng ký</button>
+    <button class="btn-secondary w-full mt-4" onclick="handleRegister()">Đăng ký</button>
+    <div id="register-message" class="error-message" style="display:none;"></div>
   </div>
-
+  <!-- bảng đky thành công -->
+  <div id="register-success-modal" class="modal1" style="display:none;">
+    <div class="modal1-content">
+        <h2>Đăng ký Tài khoản thành công!</h2>
+        <p>Tài khoản của bạn đã được tạo, bây giờ bạn có thể đăng nhập.</p>
+        <button onclick="closeRegisterSuccess()">OK</button>
+    </div>
+  </div>
   <script src="/js/scriptLogin.js" defer></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>

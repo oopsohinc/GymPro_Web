@@ -151,7 +151,38 @@ body {
     max-height: 90vh;
     overflow-y: auto;
 }
-
+/*bảng đăng ký thành công*/
+.modal1 {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal1-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.modal1-content button {
+    padding: 0.75rem 2.5rem;
+    font-size: 1.2rem;
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: background 0.2s;
+}
+.modal1-content button:hover {
+    background: #16a34a;
+}
 .form-group {
     margin-bottom: 16px;
 }

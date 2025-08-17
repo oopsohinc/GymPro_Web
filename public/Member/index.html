@@ -30,8 +30,9 @@
                     <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                     <a href="#" class="nav-link" data-page="memberships">Memberships</a>
                     <a href="#" class="nav-link" data-page="classes">Classes</a>
-                    <a href="#" class="nav-link" data-page="profile">Profile</a>
+                    <a href="#" class="nav-link" data-page="schedule">Schedule</a>
                     <a href="#" class="nav-link" data-page="progress">Progress</a>
+                    <a href="#" class="nav-link" data-page="profile">Profile</a>                  
                 </nav>
 
                 <!-- Mobile menu button -->
@@ -61,8 +62,9 @@
                     <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                     <a href="#" class="nav-link" data-page="memberships">Memberships</a>
                     <a href="#" class="nav-link" data-page="classes">Classes</a>
-                    <a href="#" class="nav-link" data-page="profile">Profile</a>
+                    <a href="#" class="nav-link" data-page="schedule">Schedule</a>
                     <a href="#" class="nav-link" data-page="progress">Progress</a>
+                    <a href="#" class="nav-link" data-page="profile">Profile</a>                    
                     <!-- Thêm nút Đăng xuất -->
                     <div class="menu-divider"></div>
                     <a href="#" class="nav-link logout-link" id="logout-link">                       
@@ -234,7 +236,28 @@
                     <!-- Classes will be populated by JavaScript -->
                 </div>
             </div>
-
+            <!-- Schedule Page -->
+            <div id="schedule-page" class="page">
+                <div class="page-header">
+                    <h1>Lịch trình của bạn</h1>
+                    <p>Xem các lớp đã đăng ký và lịch tập luyện của bạn.</p>
+                </div>
+                <div class="schedule-section">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Lớp học</th>
+                                <th>Thời gian</th>
+                                <th>Huấn luyện viên</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-body">
+                            <!-- Các dòng sẽ được thêm bằng JavaScript sau khi book class -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <!-- Profile Page -->
             <div id="profile-page" class="page">
                 <div class="page-header">

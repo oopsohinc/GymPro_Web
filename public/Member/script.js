@@ -599,7 +599,14 @@ function confirmBooking() {
                 todayClass.isBooked = true;
             }
         }
-        
+        // Thêm lịch vào bảng Schedule
+    addScheduleRow(
+        selectedClass.name,
+        selectedSchedule.time,
+        // Lấy tên huấn luyện viên từ mockData.trainers
+        (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
+        "Đã đăng ký"
+    );
         showToast('Success', 'Class booked successfully!');
         closeModal('class-booking-modal');
         
@@ -608,6 +615,19 @@ function confirmBooking() {
             loadDashboard();
         }
     }, 1500);
+}
+// Schedule function
+function addScheduleRow(className, time, trainer, status = "Đã đăng ký") {
+    const tbody = document.getElementById('schedule-body');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${className}</td>
+        <td>${time}</td>
+        <td>${trainer}</td>
+        <td>${status}</td>
+    `;
+    tbody.appendChild(tr);
 }
 // Modal overlay click to close
     const logoutLink = document.getElementById('logout-link');

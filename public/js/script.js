@@ -1085,15 +1085,15 @@ async function loadPaymentsTable() {
     try {
         const res = await fetch("http://localhost:3000/api/payments");
         const payments = await res.json();
-
+        console.log(payments);
         const tbody = document.getElementById('payments-table');
         tbody.innerHTML = '';
 
         payments.forEach(payment => {
-            const formattedDate = formatDateUTC(payment.payment_date);
             const row = document.createElement('tr');
-            const statusBadge = payment.status === 'Paid' ? 'badge-success' :
-                payment.status === 'Pending' ? 'badge-warning' : 'badge-error';
+            // const formattedDate = formatDateUTC(payment.payment_date);
+            // const statusBadge = payment.status === 'Paid' ? 'badge-success' :
+            //     payment.status === 'Pending' ? 'badge-warning' : 'badge-error';
             row.innerHTML = `
                 <td>
                     <div class="flex items-center">
@@ -1107,7 +1107,7 @@ async function loadPaymentsTable() {
                         ${payment.payment_status === true ? 'Đã thanh toán' : 'Chưa thanh toán'}
                     </span>
                 </td>
-                <td>${formattedDate || '-'}</td>
+                <td>${payment.payment_date || '-'}</td>
                 <td>
                     <button class="btn-secondary mr-2">Edit</button>
                     <button class="btn-secondary">Delete</button>

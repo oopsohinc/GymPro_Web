@@ -39,8 +39,8 @@ router.post('/payments/create-qr', async (req, res) => {
     const vnpayResponse = await vnpay.buildPaymentUrl({
         vnp_Amount: 50000,
         vnp_IpAddr: '127.0.0.1',
-        vnp_TxnRef: 'txn001',
-        vnp_OrderInfo: 'Payment for order 001',
+        vnp_TxnRef: 'txn002',
+        vnp_OrderInfo: 'Payment for order 002',
         vnp_OrderType: ProductCode.Other,
         vnp_ReturnUrl: 'http://localhost:3000/api/payments/callback',
         vnp_Locale: VnpLocale.VN,
@@ -49,6 +49,11 @@ router.post('/payments/create-qr', async (req, res) => {
     });
 
     return res.status(200).json({ vnpayResponse });
+});
+
+router.get('/payments/callback', async (req, res) => {
+    console.log('Payment callback received:', req.query);
+    res.status(200).send('OK');
 });
 
 module.exports = router;

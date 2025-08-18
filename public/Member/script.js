@@ -370,7 +370,8 @@ function loadMemberships() {
 function openUpgradeModal(membershipId) {
     selectedMembership = mockData.memberships.find(m => m.id === membershipId);
     if (!selectedMembership) return;
-    
+    // Đảm bảo chỉ mở upgrade modal, đóng booking modal nếu đang mở
+    closeModal('class-booking-modal');
     $('#upgrade-title').textContent = `Upgrade to ${selectedMembership.name}`;
     
     $('#membership-preview').innerHTML = `

@@ -1072,7 +1072,7 @@ input:checked + .slider:before {
 }
 
 /* Responsive Design */
-@media (min-width: 768px) {
+@media (min-width: 1010px) {
     .desktop-nav {
         display: flex;
     }

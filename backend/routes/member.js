@@ -24,12 +24,13 @@ router.get('/members/:id', async (req, res) => {
     const result = await pool.request()
       .input('id', sql.Int, id)
       .query(`
-        SELECT 
+          SELECT 
           m.user_id as id,
           m.full_name,
           m.email,
           m.phone,
           m.description,
+		      m.date_of_birth,
           m.date_created,
           ISNULL(ms.name, 'No Membership') as membership,
           ISNULL(class_count.enrolled, 0) as enrolled
@@ -102,29 +103,42 @@ router.delete('/members/:id', async (req, res) => {
 // Cập nhật thông tin thành viên
 router.put('/members/:id', async (req, res) => {
   const { id } = req.params;
-  const { full_name, email, phone, membership_id, start_date } = req.body;
+  const fields = req.body || {};
   try {
     const pool = await sql.connect(config);
+    const request = pool.request().input('id', sql.Int, id);
+    const fieldConfig = [
+      { name: 'full_name', type: sql.NVarChar },
+      { name: 'email', type: sql.NVarChar },
+      { name: 'phone', type: sql.NVarChar },
+      { name: 'description', type: sql.NVarChar },
+      { name: 'date_of_birth', type: sql.Date }
+    ];
+    const updates = [];
+
+    fieldConfig.forEach(({ name, type }) => {
+      const value = fields[name];
+      console.log(`Key: ${name}, Value: ${value}`);
+      if (value !== undefined && value !== '') {
+        request.input(name, type, value);
+        updates.push(`${name} = @${name}`);
+      }
+    });
+
+    if (updates.length === 0) {
+      return res.status(400).json({ success: false, message: 'Không có trường nào để cập nhật' });
+    }
 
     // Cập nhật thông tin thành viên
-    await pool.request()
-      .input('id', sql.Int, id)
-      .input('full_name', sql.NVarChar, full_name)
-      .input('email', sql.NVarChar, email)
-      .input('phone', sql.NVarChar, phone)
-      .input('membership_id', sql.Int, membership_id)
-      .input('start_date', sql.Date, start_date)
-      .query(`
-        UPDATE Members
-        SET full_name = @full_name,
-            email = @email,
-            phone = @phone,
-            membership_id = @membership_id,
-            start_date = @start_date
-        WHERE id = @id
-      `);
+    const query = `
+      UPDATE Members
+      SET ${updates.join(', ')}
+      WHERE user_id = @id
+    `;
 
-    res.json({ success: true });
+    await request.query(query);
+
+    res.json({ success: true, message: 'Cập nhật thông tin thành viên thành công' });
   } catch (err) {
     console.error('Lỗi khi cập nhật thành viên:', err);
     res.status(500).send('Lỗi server');

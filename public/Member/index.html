@@ -163,6 +163,11 @@
                                     <i data-lucide="heart"></i>
                                     <span>Track Progress</span>
                                 </button>
+
+                                <button class="btn-secondary" data-action="view-schedule">
+                                    <i data-lucide="clock"></i>
+                                    <span>View Schedule</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -278,23 +283,27 @@
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="fullName">Full Name</label>
-                                            <input type="text" id="fullName" name="fullName" required>
+                                            <input type="text" id="fullName" name="full_name" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="phone">Phone Number</label>
-                                            <input type="tel" id="phone" name="phone">
+                                            <input type="tel" id="phone" name="phone" required>
                                         </div>
                                     </div>
-                                    
+
+                                    <div class="form-group">
+                                        <label for="birthDate">Birth Date</label>
+                                        <input type="text" id="birthDate" name="date_of_birth" required placeholder="dd/mm/yyyy">
+                                    </div>
+
                                     <div class="form-group">
                                         <label for="email">Email</label>
                                         <input type="email" id="email" name="email" required>
                                     </div>
-                                    
 
                                     <div class="form-group">
                                         <label for="fitnessGoals">Fitness Goals</label>
-                                        <textarea id="fitnessGoals" name="fitnessGoals" rows="3" placeholder="Mô tả mục tiêu tập luyện của bạn..."></textarea>
+                                        <textarea id="fitnessGoals" name="description" rows="3" placeholder="Mô tả mục tiêu tập luyện của bạn..."></textarea>
                                     </div>
                                     
                                     <div class="form-actions">

@@ -19,7 +19,7 @@ const mockData = {
         smsReminders: false,
         classReminders: true
     },
-    
+
     memberships: [
         {
             id: 'basic',
@@ -61,7 +61,7 @@ const mockData = {
             popular: false
         }
     ],
-    
+
     trainers: [
         {
             id: 'sarah',
@@ -88,7 +88,7 @@ const mockData = {
             experience: '4 years'
         }
     ],
-    
+
     classes: [
         {
             id: 'yoga',
@@ -144,7 +144,7 @@ const mockData = {
             ]
         }
     ],
-    
+
     todaysClasses: [
         {
             id: 'yoga-today',
@@ -206,12 +206,12 @@ function showToast(title, message, type = 'success') {
         <div class="toast-title">${title}</div>
         <div class="toast-message">${message}</div>
     `;
-    
+
     $('#toast-container').appendChild(toast);
-    
+
     // Animate in
     setTimeout(() => toast.classList.add('show'), 100);
-    
+
     // Remove after 3 seconds
     setTimeout(() => {
         toast.classList.remove('show');
@@ -233,20 +233,20 @@ function closeModal(modalId) {
 function showPage(pageId) {
     // Hide all pages
     $$('.page').forEach(page => page.classList.remove('active'));
-    
+
     // Show selected page
     $(`#${pageId}-page`).classList.add('active');
-    
+
     // Update navigation
     $$('.nav-link').forEach(link => link.classList.remove('active'));
     $$(`[data-page="${pageId}"]`).forEach(link => link.classList.add('active'));
-    
+
     currentPage = pageId;
-    
+
     // Load page content
     switch (pageId) {
         case 'dashboard':
-            loadDashboard();
+            loadDashboardAlt(userId);
             break;
         case 'memberships':
             loadMemberships();
@@ -258,7 +258,7 @@ function showPage(pageId) {
             loadProfile();
             break;
     }
-    
+
     // Close mobile menu
     closeMobileMenu();
 }
@@ -266,7 +266,7 @@ function showPage(pageId) {
 function toggleMobileMenu() {
     const mobileMenu = $('#mobile-menu');
     const navToggle = $('#nav-toggle');
-    
+
     mobileMenu.classList.toggle('show');
     navToggle.classList.toggle('active');
 }
@@ -274,7 +274,7 @@ function toggleMobileMenu() {
 function closeMobileMenu() {
     const mobileMenu = $('#mobile-menu');
     const navToggle = $('#nav-toggle');
-    
+
     mobileMenu.classList.remove('show');
     navToggle.classList.remove('active');
 }
@@ -285,7 +285,7 @@ function loadDashboard() {
     $('#active-membership').textContent = mockData.user.currentPlan;
     $('#classes-booked').textContent = mockData.todaysClasses.filter(c => c.isBooked).length;
     $('#available-memberships').textContent = mockData.memberships.length;
-    
+
     // Load today's classes
     const classesContainer = $('#classes-today');
     if (mockData.todaysClasses.length === 0) {
@@ -317,62 +317,117 @@ function loadDashboard() {
                     <p>with ${classItem.trainer}</p>
                     <p class="class-time">${classItem.startTime} - ${classItem.endTime}</p>
                 </div>
-                ${classItem.isBooked ? 
-                    '<span class="badge badge-booked">Booked</span>' :
-                    classItem.spotsLeft <= 2 ?
-                        `<span class="badge badge-warning">${classItem.spotsLeft} spots left</span>` :
-                        '<button class="btn-primary" onclick="showPage(\'classes\')">Join Class</button>'
-                }
+                ${classItem.isBooked ?
+                '<span class="badge badge-booked">Booked</span>' :
+                classItem.spotsLeft <= 2 ?
+                    `<span class="badge badge-warning">${classItem.spotsLeft} spots left</span>` :
+                    '<button class="btn-primary" onclick="showPage(\'classes\')">Join Class</button>'
+            }
             </div>
         `).join('');
     }
 }
+async function loadDashboardAlt(userId) {
+    try {
+        const responseProfile = await fetch(`http://localhost:3000/api/members/${userId}`);
+        const responseMemberships = await fetch('http://localhost:3000/api/stats');
+        if (!responseProfile.ok || !responseMemberships.ok) {
+            throw showToast('Error', 'Failed to load dashboard data.', 'error');
+        }
+        const dataProfile = await responseProfile.json();
+        const dataMemberships = await responseMemberships.json();
+
+        // Update the dashboard with the fetched data
+        $('#active-membership').textContent = dataProfile.membership;
+        $('#classes-booked').textContent = dataMemberships.enrolled || 0;
+        $('#available-memberships').textContent = dataMemberships.totalMemberships || 0;
+        console.log(dataProfile, dataMemberships);
+
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
 
 // Membership Functions
-function loadMemberships() {
-    const container = $('#memberships-grid');
-    container.innerHTML = mockData.memberships.map(membership => `
-        <div class="membership-card ${membership.popular ? 'popular' : ''} ${membership.current ? 'current' : ''}">
-            ${membership.current ? '<div class="membership-popular-badge">Current Plan</div>' : ''}
-            ${membership.popular && !membership.current ? '<div class="membership-popular-badge">Most Popular</div>' : ''}
-            
-            <div class="membership-header">
-                <h3>${membership.name}</h3>
-                <div class="membership-price">
-                    $${membership.price}
-                    <span class="period">/month</span>
+// function loadMemberships() {
+//     const container = $('#memberships-grid');
+//     container.innerHTML = mockData.memberships.map(membership => `
+//         <div class="membership-card ${membership.popular ? 'popular' : ''} ${membership.current ? 'current' : ''}">
+//             ${membership.current ? '<div class="membership-popular-badge">Current Plan</div>' : ''}
+//             ${membership.popular && !membership.current ? '<div class="membership-popular-badge">Most Popular</div>' : ''}
+
+//             <div class="membership-header">
+//                 <h3>${membership.name}</h3>
+//                 <div class="membership-price">
+//                     $${membership.price}
+//                     <span class="period">/month</span>
+//                 </div>
+//             </div>
+
+//             <p>${membership.description}</p>
+
+//             <ul class="membership-features">
+//                 ${membership.features.map(feature => `
+//                     <li>
+//                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//                             <path d="M20 6L9 17l-5-5"></path>
+//                         </svg>
+//                         ${feature}
+//                     </li>
+//                 `).join('')}
+//             </ul>
+
+//             ${membership.current ?
+//             '<button class="btn-secondary" disabled>Current Plan</button>' :
+//             `<button class="btn-primary" onclick="openUpgradeModal('${membership.id}')">
+//                     ${membership.name === 'Elite' ? 'Upgrade Now' : 'Select Plan'}
+//                 </button>`
+//         }
+//         </div>
+//     `).join('');
+// }
+async function loadMemberships() {
+    try {
+        const response = await fetch('http://localhost:3000/api/memberships');
+        if (!response.ok) {
+            throw showToast('Error', 'Failed to load memberships.', 'error');
+        }
+        const data = await response.json();
+        // Update the UI with the fetched memberships
+        $('#memberships-grid').innerHTML = data.map(membership => `
+            <div class="membership-card">
+                <div class="membership-header">
+                    <h3>${membership.name}</h3>
+                    <div class="membership-price">
+                        ${membership.price.toLocaleString('vi-VN')}₫
+                        <span class="period">/ ${membership.duration / 30} month</span>
+                    </div>
                 </div>
-            </div>
-            
-            <p>${membership.description}</p>
-            
-            <ul class="membership-features">
-                ${membership.features.map(feature => `
+                <p>No description available</p>
+                <ul class="membership-features">
                     <li>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 6L9 17l-5-5"></path>
                         </svg>
-                        ${feature}
+                        No features available
                     </li>
-                `).join('')}
-            </ul>
-            
-            ${membership.current ?
-                '<button class="btn-secondary" disabled>Current Plan</button>' :
-                `<button class="btn-primary" onclick="openUpgradeModal('${membership.id}')">
-                    ${membership.name === 'Elite' ? 'Upgrade Now' : 'Select Plan'}
-                </button>`
-            }
-        </div>
-    `).join('');
+                </ul>
+                <button class="btn-primary" onclick="openUpgradeModal('${membership.id}')">
+                    Select Plan
+                </button>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading memberships:', error);
+    }
 }
 
 function openUpgradeModal(membershipId) {
     selectedMembership = mockData.memberships.find(m => m.id === membershipId);
     if (!selectedMembership) return;
-    
+
     $('#upgrade-title').textContent = `Upgrade to ${selectedMembership.name}`;
-    
+
     $('#membership-preview').innerHTML = `
         <div class="card" style="background: linear-gradient(135deg, rgb(147, 51, 234), rgb(236, 72, 153)); color: white; margin-bottom: 1rem;">
             <div class="card-content">
@@ -392,29 +447,29 @@ function openUpgradeModal(membershipId) {
             `).join('')}
         </div>
     `;
-    
+
     openModal('membership-upgrade-modal');
 }
 
 function processUpgrade() {
     const form = $('#payment-form');
     const formData = new FormData(form);
-    
+
     // Basic validation
     const requiredFields = ['cardholderName', 'cardNumber', 'expiryDate', 'cvv'];
     const missingFields = requiredFields.filter(field => !$(`#${field}`).value.trim());
-    
+
     if (missingFields.length > 0) {
         showToast('Error', 'Please fill in all payment details.', 'error');
         return;
     }
-    
+
     showLoading();
-    
+
     // Simulate API call
     setTimeout(() => {
         hideLoading();
-        
+
         // Update user's membership
         mockData.user.currentPlan = selectedMembership.name;
         mockData.user.planExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
@@ -422,60 +477,73 @@ function processUpgrade() {
             day: 'numeric',
             year: 'numeric'
         });
-        
+
         // Update membership current status
         mockData.memberships.forEach(m => m.current = m.id === selectedMembership.id);
-        
+
         showToast('Success', 'Membership upgraded successfully!');
         closeModal('membership-upgrade-modal');
-        
+
         // Refresh current page
         if (currentPage === 'memberships') {
             loadMemberships();
         } else if (currentPage === 'dashboard') {
             loadDashboard();
         }
-        
+
         // Reset form
         form.reset();
     }, 2000);
 }
 
 // Classes Functions
+async function loadClasses() {
+    try {
+        const response = await fetch('http://localhost:3000/api/classes');
+        const data = await response.json();
+        applyClassFilters(data);
+    } catch (error) {
+        console.error('Error loading classes:', error);
+    }
+}
+
 function loadClasses() {
     // Load trainers in filter
     const trainerFilter = $('#trainer-filter');
-    trainerFilter.innerHTML = '<option value="">All Instructors</option>' +
-        mockData.trainers.map(trainer => `<option value="${trainer.id}">${trainer.name}</option>`).join('');
-    
+    trainerFilter.innerHTML = '<option value="">All Instructors</option>';
+
     // Apply current filters
     applyClassFilters();
 }
 
-function applyClassFilters() {
+function applyClassFilters(classes) {
     const searchQuery = $('#search-classes').value.toLowerCase();
     const categoryFilter = $('#category-filter').value;
     const trainerFilter = $('#trainer-filter').value;
-    
-    filteredClasses = mockData.classes.filter(classItem => {
-        const matchesSearch = !searchQuery || 
+
+    if (!classes) {
+        return;
+    }
+
+    const filteredClasses = classes.filter(classItem => {
+        const matchesSearch = !searchQuery ||
             classItem.name.toLowerCase().includes(searchQuery) ||
             classItem.description.toLowerCase().includes(searchQuery);
-        
-        const matchesCategory = !categoryFilter || classItem.category === categoryFilter;
-        
-        const matchesTrainer = !trainerFilter || classItem.trainerId === trainerFilter;
-        
+
+        const matchesCategory = !categoryFilter || classItem.level_name === categoryFilter;
+
+        const matchesTrainer = !trainerFilter || classItem.trainer_id === trainerFilter;
+
         return matchesSearch && matchesCategory && matchesTrainer;
     });
-    
-    renderClasses();
+
+    renderClasses(filteredClasses);
 }
 
-function renderClasses() {
+function renderClasses(classes) {
     const container = $('#classes-grid');
-    
-    if (filteredClasses.length === 0) {
+
+    if (!classes || classes.length === 0) {
         container.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
                 <div class="class-meta mb-4">
@@ -490,11 +558,10 @@ function renderClasses() {
         `;
         return;
     }
-    
-    container.innerHTML = filteredClasses.map(classItem => {
-        const trainer = mockData.trainers.find(t => t.id === classItem.trainerId);
-        const spotsLeft = classItem.maxParticipants - classItem.currentParticipants;
-        
+
+    container.innerHTML = classes.map(classItem => {
+        const spotsLeft = classItem.max_capacity - classItem.capacity;
+
         return `
             <div class="card class-card">
                 <div class="class-image">
@@ -503,10 +570,10 @@ function renderClasses() {
                 <div class="class-details">
                     <h3>
                         ${classItem.name}
-                        ${spotsLeft <= 2 ? 
-                            `<span class="badge badge-warning">${spotsLeft} spots left</span>` :
-                            '<span class="badge badge-available">Available</span>'
-                        }
+                        ${spotsLeft <= 2 ?
+                `<span class="badge badge-warning">${spotsLeft} spots left</span>` :
+                '<span class="badge badge-available">Available</span>'
+            }
                     </h3>
                     
                     <div class="class-meta">
@@ -514,7 +581,7 @@ function renderClasses() {
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
-                        <span>${trainer ? trainer.name : 'Unknown Trainer'}</span>
+                        <span>${classItem.full_name}</span>
                     </div>
                     
                     <div class="class-meta">
@@ -522,7 +589,7 @@ function renderClasses() {
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12,6 12,12 16,14"></polyline>
                         </svg>
-                        <span>${classItem.duration} minutes</span>
+                        <span>${classItem.time}</span>
                     </div>
                     
                     <div class="class-meta">
@@ -532,12 +599,12 @@ function renderClasses() {
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
-                        <span>${classItem.currentParticipants}/${classItem.maxParticipants} spots filled</span>
+                        <span>${classItem.capacity}/${classItem.max_capacity} spots filled</span>
                     </div>
                     
-                    <p class="class-description">${classItem.description}</p>
+                                        <p class="class-description">${classItem.description}</p>
                     
-                    <button class="btn-primary" onclick="openBookingModal('${classItem.id}')" 
+                    <button class="btn-primary" onclick="openBookingModal('${classItem.class_id}')" 
                             ${spotsLeft <= 0 ? 'disabled' : ''}>
                         ${spotsLeft <= 0 ? 'Class Full' : 'Book Class'}
                     </button>
@@ -546,76 +613,249 @@ function renderClasses() {
         `;
     }).join('');
 }
+async function openBookingModal(classId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/classes/${classId}`);
+        const classItem = await response.json();
 
-function openBookingModal(classId) {
-    selectedClass = mockData.classes.find(c => c.id === classId);
-    if (!selectedClass) return;
-    
-    const trainer = mockData.trainers.find(t => t.id === selectedClass.trainerId);
-    
-    $('#booking-class-name').textContent = selectedClass.name;
-    $('#booking-trainer-name').textContent = `with ${trainer ? trainer.name : 'Unknown Trainer'}`;
-    
-    // Generate time slots
-    const timeSlotsContainer = $('#time-slots');
-    timeSlotsContainer.innerHTML = selectedClass.schedules.map((schedule, index) => `
-        <div class="time-slot">
-            <input type="radio" name="timeSlot" value="${index}" id="slot-${index}">
-            <label for="slot-${index}" class="time-slot-info">
-                <div class="time-slot-label">
-                    ${schedule.date === 'today' ? 'Today' : 
-                      schedule.date === 'tomorrow' ? 'Tomorrow' : 
-                      schedule.date.charAt(0).toUpperCase() + schedule.date.slice(1)} - ${schedule.time}
-                </div>
-                <div class="time-slot-spots">${schedule.spots} spots available</div>
-            </label>
-        </div>
-    `).join('');
-    
-    openModal('class-booking-modal');
+        if (!classItem) return;
+
+        const trainer = classItem.full_name;
+
+        $('#booking-class-name').textContent = classItem.name;
+        $('#booking-trainer-name').textContent = `with ${trainer}`;
+
+        // Generate time slots
+        const timeSlotsContainer = $('#time-slots');
+        timeSlotsContainer.innerHTML = `
+            <div class="time-slot">
+                <input type="radio" name="timeSlot" value="${classItem.class_id}" id="slot-${classItem.class_id}">
+                <label for="slot-${classItem.class_id}" class="time-slot-info">
+                    <div class="time-slot-label">
+                        ${classItem.schedule} - ${classItem.time}
+                    </div>
+                    <div class="time-slot-spots">${classItem.max_capacity - classItem.capacity} spots available</div>
+                </label>
+            </div>
+        `;
+
+        openModal('class-booking-modal');
+    } catch (error) {
+        console.error('Error loading class:', error);
+    }
 }
-
-function confirmBooking() {
+async function confirmBooking() {
     const selectedSlot = $('input[name="timeSlot"]:checked');
-    
+
     if (!selectedSlot) {
         showToast('Error', 'Please select a time slot.', 'error');
         return;
     }
-    
+
     showLoading();
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/bookings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                class_id: selectedSlot.value
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            hideLoading();
+            showToast('Success', 'Class booked successfully!');
+            closeModal('class-booking-modal');
+        } else {
+            hideLoading();
+            showToast('Error', 'Failed to book class.', 'error');
+        }
+    } catch (error) {
         hideLoading();
-        
-        // Update class as booked in today's classes if it's a today slot
-        const slotIndex = parseInt(selectedSlot.value);
-        const selectedSchedule = selectedClass.schedules[slotIndex];
-        
-        if (selectedSchedule.date === 'today') {
-            const todayClass = mockData.todaysClasses.find(c => c.name === selectedClass.name);
-            if (todayClass) {
-                todayClass.isBooked = true;
-            }
-        }
-        // Thêm lịch vào bảng Schedule
-        addScheduleRow(
-        selectedClass.name,
-        selectedSchedule.date,
-        selectedSchedule.time,
-        (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
-        "Registered"
-        );
-        showToast('Success', 'Class booked successfully!');
-        closeModal('class-booking-modal');
-        
-        // Refresh dashboard if currently on dashboard
-        if (currentPage === 'dashboard') {
-            loadDashboard();
-        }
-    }, 1500);
+        console.error('Error booking class:', error);
+    }
 }
+
+// function loadClasses() {
+//     // Load trainers in filter
+//     const trainerFilter = $('#trainer-filter');
+//     trainerFilter.innerHTML = '<option value="">All Instructors</option>' +
+//         mockData.trainers.map(trainer => `<option value="${trainer.id}">${trainer.name}</option>`).join('');
+
+//     // Apply current filters
+//     applyClassFilters();
+// }
+
+// function applyClassFilters() {
+//     const searchQuery = $('#search-classes').value.toLowerCase();
+//     const categoryFilter = $('#category-filter').value;
+//     const trainerFilter = $('#trainer-filter').value;
+
+//     filteredClasses = mockData.classes.filter(classItem => {
+//         const matchesSearch = !searchQuery ||
+//             classItem.name.toLowerCase().includes(searchQuery) ||
+//             classItem.description.toLowerCase().includes(searchQuery);
+
+//         const matchesCategory = !categoryFilter || classItem.category === categoryFilter;
+
+//         const matchesTrainer = !trainerFilter || classItem.trainerId === trainerFilter;
+
+//         return matchesSearch && matchesCategory && matchesTrainer;
+//     });
+
+//     renderClasses();
+// }
+
+// function renderClasses() {
+//     const container = $('#classes-grid');
+
+//     if (filteredClasses.length === 0) {
+//         container.innerHTML = `
+//             <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+//                 <div class="class-meta mb-4">
+//                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//                         <circle cx="11" cy="11" r="8"></circle>
+//                         <path d="M21 21l-4.35-4.35"></path>
+//                     </svg>
+//                 </div>
+//                 <h3>No classes found</h3>
+//                 <p>Try adjusting your search criteria to find more classes.</p>
+//             </div>
+//         `;
+//         return;
+//     }
+
+//     container.innerHTML = filteredClasses.map(classItem => {
+//         const trainer = mockData.trainers.find(t => t.id === classItem.trainerId);
+//         const spotsLeft = classItem.maxParticipants - classItem.currentParticipants;
+
+//         return `
+//             <div class="card class-card">
+//                 <div class="class-image">
+//                     ${classItem.name}
+//                 </div>
+//                 <div class="class-details">
+//                     <h3>
+//                         ${classItem.name}
+//                         ${spotsLeft <= 2 ?
+//                 `<span class="badge badge-warning">${spotsLeft} spots left</span>` :
+//                 '<span class="badge badge-available">Available</span>'
+//             }
+//                     </h3>
+                    
+//                     <div class="class-meta">
+//                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+//                             <circle cx="12" cy="7" r="4"></circle>
+//                         </svg>
+//                         <span>${trainer ? trainer.name : 'Unknown Trainer'}</span>
+//                     </div>
+                    
+//                     <div class="class-meta">
+//                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//                             <circle cx="12" cy="12" r="10"></circle>
+//                             <polyline points="12,6 12,12 16,14"></polyline>
+//                         </svg>
+//                         <span>${classItem.duration} minutes</span>
+//                     </div>
+                    
+//                     <div class="class-meta">
+//                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+//                             <circle cx="9" cy="7" r="4"></circle>
+//                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+//                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+//                         </svg>
+//                         <span>${classItem.currentParticipants}/${classItem.maxParticipants} spots filled</span>
+//                     </div>
+                    
+//                     <p class="class-description">${classItem.description}</p>
+                    
+//                     <button class="btn-primary" onclick="openBookingModal('${classItem.id}')" 
+//                             ${spotsLeft <= 0 ? 'disabled' : ''}>
+//                         ${spotsLeft <= 0 ? 'Class Full' : 'Book Class'}
+//                     </button>
+//                 </div>
+//             </div>
+//         `;
+//     }).join('');
+// }
+
+// function openBookingModal(classId) {
+//     selectedClass = mockData.classes.find(c => c.id === classId);
+//     if (!selectedClass) return;
+
+//     const trainer = mockData.trainers.find(t => t.id === selectedClass.trainerId);
+
+//     $('#booking-class-name').textContent = selectedClass.name;
+//     $('#booking-trainer-name').textContent = `with ${trainer ? trainer.name : 'Unknown Trainer'}`;
+
+//     // Generate time slots
+//     const timeSlotsContainer = $('#time-slots');
+//     timeSlotsContainer.innerHTML = selectedClass.schedules.map((schedule, index) => `
+//         <div class="time-slot">
+//             <input type="radio" name="timeSlot" value="${index}" id="slot-${index}">
+//             <label for="slot-${index}" class="time-slot-info">
+//                 <div class="time-slot-label">
+//                     ${schedule.date === 'today' ? 'Today' :
+//             schedule.date === 'tomorrow' ? 'Tomorrow' :
+//                 schedule.date.charAt(0).toUpperCase() + schedule.date.slice(1)} - ${schedule.time}
+//                 </div>
+//                 <div class="time-slot-spots">${schedule.spots} spots available</div>
+//             </label>
+//         </div>
+//     `).join('');
+
+//     openModal('class-booking-modal');
+// }
+
+// function confirmBooking() {
+//     const selectedSlot = $('input[name="timeSlot"]:checked');
+
+//     if (!selectedSlot) {
+//         showToast('Error', 'Please select a time slot.', 'error');
+//         return;
+//     }
+
+//     showLoading();
+
+//     // Simulate API call
+//     setTimeout(() => {
+//         hideLoading();
+
+//         // Update class as booked in today's classes if it's a today slot
+//         const slotIndex = parseInt(selectedSlot.value);
+//         const selectedSchedule = selectedClass.schedules[slotIndex];
+
+//         if (selectedSchedule.date === 'today') {
+//             const todayClass = mockData.todaysClasses.find(c => c.name === selectedClass.name);
+//             if (todayClass) {
+//                 todayClass.isBooked = true;
+//             }
+//         }
+//         // Thêm lịch vào bảng Schedule
+//         addScheduleRow(
+//             selectedClass.name,
+//             selectedSchedule.date,
+//             selectedSchedule.time,
+//             (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
+//             "Registered"
+//         );
+//         showToast('Success', 'Class booked successfully!');
+//         closeModal('class-booking-modal');
+
+//         // Refresh dashboard if currently on dashboard
+//         if (currentPage === 'dashboard') {
+//             loadDashboard();
+//         }
+//     }, 1500);
+// }
+
 // Schedule function
 function addScheduleRow(className, date, time, trainer, status = "Registered") {
     const tbody = document.getElementById('schedule-body');
@@ -647,13 +887,14 @@ function formatScheduleDate(dateStr) {
     return days[dateStr.toLowerCase()] || dateStr;
 }
 // Modal overlay click to close
-    const logoutLink = document.getElementById('logout-link');
+const logoutLink = document.getElementById('logout-link');
 if (logoutLink) {
-    logoutLink.addEventListener('click', function(e) {
+    logoutLink.addEventListener('click', function (e) {
         e.preventDefault();
         window.location.href = '/login.html';
     });
 }
+
 // Profile Functions
 const params = new URLSearchParams(window.location.search);
 const userId = params.get("id");
@@ -664,13 +905,42 @@ function loadProfile() {
 
 function formatDate(dateString) {
     if (!dateString) return 'Unknown';
-    
+
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
+}
+function formatDateUTC(isoString) {
+    if (!isoString) return '—'; // xử lý giá trị null hoặc undefined
+
+    const date = new Date(isoString);
+    if (isNaN(date)) return 'Invalid Date';
+
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+
+    return `${day}/${month}/${year}`;
+}
+function isValidDateFormat(dateString) {
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    if (!regex.test(dateString)) return false;
+
+    const [day, month, year] = dateString.split('/').map(Number);
+    const date = new Date(`${year}-${month}-${day}`);
+
+    return (
+        date.getFullYear() === year &&
+        date.getMonth() + 1 === month &&
+        date.getDate() === day
+    );
+}
+function parseDateToISO(dateString) {
+    const [day, month, year] = dateString.split('/');
+    return new Date(`${year}-${month}-${day}`).toISOString();
 }
 
 async function loadProfileData(userId) {
@@ -684,6 +954,7 @@ async function loadProfileData(userId) {
         $('#fullName').value = user.full_name;
         $('#email').value = user.email;
         $('#phone').value = user.phone;
+        $('#birthDate').value = formatDateUTC(user.date_of_birth);
         $('#fitnessGoals').value = user.description;
 
         // Update preferences
@@ -692,9 +963,9 @@ async function loadProfileData(userId) {
         // $('#classReminders').checked = user.classReminders;
 
         // Update profile summary
-        $('#avatar-initials').textContent = user.full_name[0];
-        $('#profile-name').textContent = user.full_name;
-        $('#profile-membership').textContent = `${user.membership} Member`;
+        $('#avatar-initials').textContent = user.full_name[0] || 'N/A';
+        $('#profile-name').textContent = user.full_name || 'N/A';
+        $('#profile-membership').textContent = `${user.membership} Member` || 'N/A';
         $('#enrolled-classes').textContent = user.enrolled || 0;
         $('#member-since').textContent = formatDate(user.date_created);
 
@@ -703,35 +974,50 @@ async function loadProfileData(userId) {
     }
 }
 
-function saveProfile(event) {
-    event.preventDefault();
-    
+async function saveProfile(e) {
+    e.preventDefault();
+
     showLoading();
-    
-    // Simulate API call
-    setTimeout(() => {
+    setTimeout(async () => {
         hideLoading();
-        
-        // Update mock data
-        const form = event.target;
-        const formData = new FormData(form);
-        
-        Object.keys(mockData.user).forEach(key => {
-            if (formData.has(key)) {
-                mockData.user[key] = formData.get(key);
+
+        const formData = new FormData(e.target);
+        const updateData = {};
+
+        for (const [key, value] of formData.entries()) {
+            if (value.trim() !== '') {
+                if (key === 'date_of_birth') {
+                    if (!isValidDateFormat(value.trim())) {
+                        showToast('Error', 'Invalid date format. Use DD/MM/YYYY.', 'error');
+                        return;
+                    }
+                    updateData[key] = parseDateToISO(value.trim());
+                } else {
+                    updateData[key] = value.trim();
+                }
             }
-        });
-        
-        // Update preferences
-        mockData.user.emailNotifications = $('#emailNotifications').checked;
-        mockData.user.smsReminders = $('#smsReminders').checked;
-        mockData.user.classReminders = $('#classReminders').checked;
-        
-        // Update profile display
-        $('#avatar-initials').textContent = mockData.user.firstName[0] + mockData.user.lastName[0];
-        $('#profile-name').textContent = `${mockData.user.firstName} ${mockData.user.lastName}`;
-        
-        showToast('Success', 'Profile updated successfully!');
+            console.log(`Key: ${key}, Value: ${value}`);
+        }
+        if (Object.keys(updateData).length === 0) {
+            showToast('Error', 'No changes made to update.', 'error');
+            return;
+        }
+        try {
+            console.log(userId, updateData);
+            const response = await fetch(`http://localhost:3000/api/members/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+            if (!response.ok) throw showToast('Error', 'Failed to update profile', 'error');
+
+            const result = await response.json();
+            showToast('Success', result.message);
+        } catch (error) {
+            console.error('Error updating profile:', error.message);
+        }
     }, 1500);
 }
 
@@ -748,16 +1034,18 @@ function handleQuickAction(action) {
             showPage('profile');
             break;
         case 'track-progress':
-            showToast('Info', 'Progress tracking feature coming soon!');
+            showPage('progress');
+            break;
+        case 'view-schedule':
+            showPage('schedule');
             break;
     }
 }
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize Lucide icons
     lucide.createIcons();
-    
     // Navigation event listeners
     $$('[data-page]').forEach(link => {
         link.addEventListener('click', (e) => {
@@ -765,26 +1053,26 @@ document.addEventListener('DOMContentLoaded', function() {
             showPage(link.dataset.page);
         });
     });
-    
+
     // Mobile menu toggles
     $('#nav-toggle').addEventListener('click', toggleMobileMenu);
     $('#close-menu-button').addEventListener('click', closeMobileMenu);
-    
+
     // Quick action buttons
     $$('[data-action]').forEach(button => {
         button.addEventListener('click', (e) => {
             handleQuickAction(button.dataset.action);
         });
     });
-    
+
     // Class filters
     $('#search-classes').addEventListener('input', applyClassFilters);
     $('#category-filter').addEventListener('change', applyClassFilters);
     $('#trainer-filter').addEventListener('change', applyClassFilters);
-    
+
     // Profile form
     $('#profile-form').addEventListener('submit', saveProfile);
-    
+
     // Modal overlay click to close
     $('#modal-overlay').addEventListener('click', (e) => {
         if (e.target === $('#modal-overlay')) {
@@ -792,9 +1080,9 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal('membership-upgrade-modal');
         }
     });
-    
+
     // Initial page load
-    loadDashboard();
+    loadDashboardAlt(userId);
 });
 
 // Global functions for onclick handlers

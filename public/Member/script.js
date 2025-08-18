@@ -744,11 +744,14 @@ function handleQuickAction(action) {
         case 'book-classes':
             showPage('classes');
             break;
+        case 'view-schedule':
+            showPage('schedule');
+            break;
         case 'update-profile':
             showPage('profile');
             break;
         case 'track-progress':
-            showToast('Info', 'Progress tracking feature coming soon!');
+            showPage('progress');
             break;
     }
 }

@@ -511,7 +511,8 @@ async function loadMemberships() {
 function openUpgradeModal(membershipId) {
     selectedMembership = mockData.memberships.find(m => m.id === membershipId);
     if (!selectedMembership) return;
-
+    // Đảm bảo chỉ mở upgrade modal, đóng booking modal nếu đang mở
+    closeModal('class-booking-modal');
     $('#upgrade-title').textContent = `Upgrade to ${selectedMembership.name}`;
 
     $('#membership-preview').innerHTML = `
@@ -1042,7 +1043,44 @@ if (logoutLink) {
         window.location.href = '/login.html';
     });
 }
+// Schedule function
+function addScheduleRow(className, date, time, trainer, status = "Registered") {
+    const tbody = document.getElementById('schedule-body');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${className}</td>
+        <td>${formatScheduleDate(date)}</td>
+        <td>${time}</td>
+        <td>${trainer}</td>
+        <td>${status}</td>
+    `;
+    tbody.appendChild(tr);
+}
 
+// Hàm chuyển đổi thứ/ngày
+function formatScheduleDate(dateStr) {
+    if (dateStr === 'today') return 'Today';
+    if (dateStr === 'tomorrow') return 'Tomorrow';
+    const days = {
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+        sunday: 'Sunday'
+    };
+    return days[dateStr.toLowerCase()] || dateStr;
+}
+// Modal overlay click to close
+    const logoutLink = document.getElementById('logout-link');
+if (logoutLink) {
+    logoutLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = '/login.html';
+    });
+}
 // Profile Functions
 const params = new URLSearchParams(window.location.search);
 const userId = params.get("id");
@@ -1177,6 +1215,9 @@ function handleQuickAction(action) {
             break;
         case 'book-classes':
             showPage('classes');
+            break;
+        case 'view-schedule':
+            showPage('schedule');
             break;
         case 'update-profile':
             showPage('profile');

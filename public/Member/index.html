@@ -153,12 +153,12 @@
                                     <i data-lucide="calendar-plus"></i>
                                     <span>Book Classes</span>
                                 </button>
-                                
-                                <button class="btn-secondary" data-action="update-profile">
-                                    <i data-lucide="user-cog"></i>
-                                    <span>Update Profile</span>
+
+                                <button class="btn-secondary" data-action="view-schedule">
+                                    <i data-lucide="clock"></i>
+                                    <span>View Schedule</span>
                                 </button>
-                                
+                                                            
                                 <button class="btn-secondary" data-action="track-progress">
                                     <i data-lucide="heart"></i>
                                     <span>Track Progress</span>
@@ -264,6 +264,29 @@
                     </table>
                 </div>
             </div>
+            <!-- Schedule Page -->
+            <div id="schedule-page" class="page">
+                <div class="page-header">
+                    <h1>Your schedule</h1>
+                    <p>View your registered classes and workout schedule.</p>
+                </div>
+                <div class="schedule-section">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Day/date</th>
+                                <th>Time</th>
+                                <th>Trainer</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-body">
+                            <!-- Các dòng sẽ được thêm bằng JavaScript sau khi book class -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <!-- Profile Page -->
             <div id="profile-page" class="page">
                 <div class="page-header">
@@ -307,6 +330,8 @@
                                     </div>
                                     
                                     <div class="form-actions">
+                                        <button type="submit" class="btn-primary">Save</button>
+                                        <button type="button" class="btn-secondary" onclick="loadProfileData()">Cancel</button>
                                         <button type="submit" class="btn-primary">Save</button>
                                         <button type="button" class="btn-secondary" onclick="loadProfileData()">Cancel</button>
                                     </div>

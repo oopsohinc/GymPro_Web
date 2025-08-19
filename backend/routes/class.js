@@ -108,6 +108,7 @@ router.put('/classes/:id', async (req, res) => {
     const fieldConfig = [
       { key: 'name', type: sql.NVarChar },
       { key: 'description', type: sql.NVarChar },
+      { key: 'description', type: sql.NVarChar },
       { key: 'schedule', type: sql.NVarChar },
       { key: 'time', type: sql.Time },
       { key: 'capacity', type: sql.Int },

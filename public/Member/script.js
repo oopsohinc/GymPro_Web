@@ -1074,7 +1074,6 @@ function formatScheduleDate(dateStr) {
     return days[dateStr.toLowerCase()] || dateStr;
 }
 // Modal overlay click to close
-    const logoutLink = document.getElementById('logout-link');
 if (logoutLink) {
     logoutLink.addEventListener('click', function(e) {
         e.preventDefault();

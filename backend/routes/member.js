@@ -14,6 +14,30 @@ router.get('/members', async (req, res) => {
     res.status(500).send('Lỗi server');
   }
 });
+router.get('/members/memberships', async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request().query(`
+        SELECT 
+          m.user_id as id,
+          m.full_name,
+          m.email,
+          m.phone,
+          m.description,
+		      m.date_of_birth,
+          m.date_created,
+          ISNULL(ms.name, 'No Membership') as membership
+        FROM Members m
+        LEFT JOIN Member_Memberships mm ON m.user_id = mm.user_id 
+        LEFT JOIN Memberships ms ON mm.membership_id = ms.membership_id
+        ORDER BY m.user_id;
+      `);
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Lỗi khi lấy danh sách thành viên:', err);
+    res.status(500).send('Lỗi server');
+  }
+});
 
 // Lấy thông tin thành viên theo ID
 router.get('/members/:id', async (req, res) => {
@@ -59,7 +83,7 @@ router.get('/members/:id', async (req, res) => {
 
 // Thêm thành viên mới
 router.post('/members', async (req, res) => {
-  const { full_name, email, phone, membership_id, start_date } = req.body;
+  const { full_name, email, phone, date_of_birth, date_created, description } = req.body;
   try {
     const pool = await sql.connect(config);
 
@@ -68,11 +92,12 @@ router.post('/members', async (req, res) => {
       .input('full_name', sql.NVarChar, full_name)
       .input('email', sql.NVarChar, email)
       .input('phone', sql.NVarChar, phone)
-      .input('membership_id', sql.Int, membership_id)
-      .input('start_date', sql.Date, start_date)
+      .input('date_of_birth', sql.Date, date_of_birth)
+      .input('date_created', sql.Date, date_created)
+      .input('description', sql.NVarChar, description)
       .query(`
-        INSERT INTO Members (full_name, email, phone, membership_id, start_date) 
-        VALUES (@full_name, @email, @phone, @membership_id, @start_date)
+        INSERT INTO Members (full_name, email, phone, date_of_birth, date_created, description) 
+        VALUES (@full_name, @email, @phone, @date_of_birth, @date_created, @description)
       `);
 
     res.json({ success: true });
@@ -91,7 +116,7 @@ router.delete('/members/:id', async (req, res) => {
     // Xóa thành viên theo ID
     await pool.request()
       .input('id', sql.Int, id)
-      .query('DELETE FROM Members WHERE id = @id');
+      .query('DELETE FROM Members WHERE user_id = @id');
 
     res.json({ success: true });
   } catch (err) {

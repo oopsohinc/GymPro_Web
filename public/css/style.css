@@ -317,6 +317,16 @@ body {
     box-sizing: border-box;
 }
 
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+
 .form-input:focus {
     outline: none;
     border-color: rgb(147 51 234);

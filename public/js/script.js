@@ -179,10 +179,41 @@ function hideModal(modalId) {
 }
 
 function showAddMemberModal() {
-    showModal('add-member-modal');
+    showModal('add-user-modal');
+    document.getElementById('add-user-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        const newClass = {
+            username: formData.get('username'),
+            password: formData.get('password')
+        };
+
+        try {
+            const res = await fetch("http://localhost:3000/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newClass)
+            });
+
+            if (!res.ok) {
+                throw showNotification('Failed to add user', 'error');
+            }
+
+            const data = await res.json();
+            showNotification(data.message, 'success');
+            loadMembersTable();
+            hideModal('add-user-modal');
+            showModal('add-member-modal');
+            e.target.reset();
+        } catch (error) {
+            
+        }
+    });
 }
 
 function closeAddMemberModal() {
+    hideModal('add-user-modal');
     hideModal('add-member-modal');
 }
 
@@ -462,24 +493,86 @@ function showWIP(id) {
 
 // Xử lý gửi form
 function setupFormHandlers() {
-    document.getElementById('add-member-form').addEventListener('submit', function (e) {
+    
+    document.getElementById('add-member-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const formData = new FormData(e.target);
-        const newMember = {
-            id: mockData.members.length + 1,
-            name: formData.get('name'),
+
+        const newClass = {
+            full_name: formData.get('full_name'),
             email: formData.get('email'),
             phone: formData.get('phone'),
-            membership: formData.get('membership'),
-            startDate: formData.get('startDate'),
-            status: 'Active',
-            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+            date_of_birth: formData.get('date_of_birth'),
+            description: formData.get('description')
         };
-        mockData.members.push(newMember);
-        loadMembersTable();
-        hideModal('add-member-modal');
-        e.target.reset();
-        alert('Member added successfully!');
+
+        try {
+            const res = await fetch("http://localhost:3000/api/members", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newClass)
+            });
+
+            if (!res.ok) {
+                throw showNotification('Failed to add member', 'error');
+            }
+
+            const data = await res.json();
+            showNotification(data.message, 'success');
+            loadMembersTable();
+            hideModal('add-member-modal');
+            e.target.reset();
+        } catch (error) {
+            console.error('Error adding member:', error);
+            alert('Error adding member');
+        }
+    });
+
+    document.getElementById('edit-member-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const memberId = this.getAttribute('data-member-id');
+        const formData = new FormData(e.target);
+        const updatedMember = {};
+
+        for (const [key, value] of formData.entries()) {
+            if (value.trim() !== '') {
+                if (key === 'date_of_birth') {
+                    if (!isValidDateFormat(value)) {
+                        showNotification('Invalid date format. Please use YYYY-MM-DD.', 'error');
+                        return;
+                    }
+                    updatedMember[key] = parseDateToISO(value.trim());
+                } else {
+                    updatedMember[key] = value.trim();
+                }
+            }
+            console.log(`Key: ${key}, Value: ${value}`);
+        }
+        if (Object.keys(updatedMember).length === 0) {
+            showNotification('No changes made to update.', 'error');
+            return;
+        }
+        console.log('Updated Member Data:', updatedMember);
+        try {
+            const res = await fetch(`http://localhost:3000/api/members/${memberId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedMember)
+            });
+
+            if (!res.ok) {
+                throw showNotification('Failed to update member', 'error');
+            }
+
+            const data = await res.json();
+            showNotification(data.message, 'success');
+            loadMembersTable();
+            hideModal('edit-member-modal');
+            e.target.reset();
+        } catch (error) {
+            console.error('Error updating member:', error);
+            alert('Error updating member');
+        }
     });
 
     document.getElementById('add-trainer-form').addEventListener('submit', async function (e) {
@@ -937,10 +1030,60 @@ async function loadTrainers() {
 }
 
 // Load members
+function isValidDateFormat(dateString) {
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    if (!regex.test(dateString)) return false;
+
+    const [day, month, year] = dateString.split('/').map(Number);
+    const date = new Date(`${year}-${month}-${day}`);
+
+    return (
+        date.getFullYear() === year &&
+        date.getMonth() + 1 === month &&
+        date.getDate() === day
+    );
+}
+function parseDateToISO(dateString) {
+    const [day, month, year] = dateString.split('/');
+    return new Date(`${year}-${month}-${day}`).toISOString();
+}
+
+function editMember(memberId) {
+    try {
+        const form = document.getElementById('edit-member-form');
+        form.setAttribute('data-member-id', memberId);
+
+        showModal('edit-member-modal');
+    } catch (error) {
+        console.error('Error updating membership:', error);
+    }
+}
+async function deleteMember(memberId) {
+    if (!confirm("Bạn có chắc chắn muốn xóa thành viên này?")) return;
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/members/${memberId}`, {
+            method: "DELETE"
+        });
+
+        const result = await res.json();
+        if (result.success) {
+            showNotification(`Xóa thành viên thành công`);
+            loadMembersTable();
+        } else {
+            alert("Failed to delete member");
+        }
+    } catch (err) {
+        console.error("Error deleting member:", err);
+        alert(err.message || "An error occurred while deleting member");
+    }
+}
+
 async function loadMembersTable() {
     try {
-        const res = await fetch("http://localhost:3000/api/members");
+        const res = await fetch("http://localhost:3000/api/members/memberships");
         const members = await res.json();
+        console.log(members);
 
         const tbody = document.getElementById('members-table');
         const avatarUrl = 'https://tinyurl.com/bdzz4yjw';
@@ -952,17 +1095,19 @@ async function loadMembersTable() {
                 <td>
                     <div class="flex items-center">
                         <img src="${avatarUrl}" alt="${member.full_name}" class="w-10 h-10 rounded-full mr-3">
-                        <div>
-                            <div class="font-medium text-gray-900">${member.full_name}</div>
+                        <div class="tooltip">
+                            <div class="tooltip-text font-medium text-gray-900">${member.full_name}</div>
                             <div class="text-sm text-gray-500">${member.email}</div>
+                            <div class="text-sm text-gray-500">${member.phone}</div>
+                            <div class="tooltip-description">${member.description || 'No description available'}</div>
                         </div>
                     </div>
                 </td>
-                <td><span class="badge badge-${member.membership === 'Premium' ? 'success' : 'warning'}">${member.membership}</span></td>
-                <td><span class="badge badge-success">${member.status}</span></td>
-                <td>${member.start_date}</td>
+                <td><span class="badge badge-${member.membership === 'No Membership' ? 'warning' : 'success'}">${member.membership}</span></td>
+                <td>${formatDateUTC(member.date_created)}</td>
+                <td>${formatDateUTC(member.date_of_birth)}</td>
                 <td>
-                    <button class="btn-secondary text-blue-600 hover:underline mr-2" onclick="showEditMemberModal(${member.id})">Edit</button>
+                    <button class="btn-secondary text-blue-600 hover:underline mr-2" onclick="editMember(${member.id})">Edit</button>
                     <button class="btn-secondary text-red-600 hover:underline" onclick="deleteMember(${member.id})">Delete</button>
                 </td>
             `;

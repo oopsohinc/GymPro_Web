@@ -8,7 +8,15 @@
 //     return;
 //   }
 
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.add('show');
+}
 
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('show');
+}
 
 function showTab(tabId) {
     document.getElementById('owner-tab').classList.add('hidden');
@@ -43,11 +51,10 @@ function closeRegister() {
 }
 // Hàm xử lý đăng ký 
 function handleRegister() {
-    const fullName = document.getElementById('registerFullName').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
+    const username = document.getElementById('registerUsername').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
 
-    if (!fullName || !email || !password) {
+    if (!username || !password) {
         document.getElementById('register-message').textContent = "Vui lòng nhập đầy đủ thông tin.";
         document.getElementById('register-message').style.display = "block";
         return;
@@ -168,6 +175,46 @@ async function loginOwner(username, password) {
     }
 }
 
+async function registerUser(username, password) {
+    const usernameInput = document.getElementById("registerUsername");
+    const passwordInput = document.getElementById("registerPassword");
+    const registerMessage = document.getElementById("register-message");
+
+    // Reset lỗi
+    usernameInput.classList.remove("error");
+    passwordInput.classList.remove("error");
+    registerMessage.style.display = "none";
+
+    const serverRunning = await checkServerStatus();
+    if (!serverRunning) {
+        registerMessage.textContent = "Server chưa được khởi động.";
+        registerMessage.style.display = "block";
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:3000/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            showModal('register-success-modal');
+            hideModal('register-modal');
+        } else {
+            registerMessage.textContent = data.message || "Đăng ký không thành công";
+            registerMessage.style.display = "block";
+        }
+    } catch (error) {
+        registerMessage.textContent = "Có lỗi xảy ra. Vui lòng thử lại.";
+        registerMessage.style.display = "block";
+        console.error("Error during registration:", error);
+    }
+}
+
 document.getElementById("owner-tab").addEventListener("submit", async function (e) {
     e.preventDefault();
     const username = document.getElementById("username").value;
@@ -180,4 +227,11 @@ document.getElementById("member-tab").addEventListener("submit", async function 
     const username = document.getElementById("usernameMember").value;
     const password = document.getElementById("passwordMember").value;
     await loginMember(username, password);
+});
+
+document.getElementById("register-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const username = document.getElementById("registerUsername").value;
+    const password = document.getElementById("registerPassword").value;
+    await registerUser(username, password);
 });

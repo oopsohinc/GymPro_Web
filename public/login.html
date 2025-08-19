@@ -99,29 +99,30 @@
     }
 
     /* Mặc định input */
-.form-input {
-  border: 1px solid #ccc;
-  background-color: #fff;
-  color: #000;
-  outline: none;
-  padding: 8px;
-  border-radius: 4px;
-  transition: border-color 0.3s ease;
-}
+    .form-input {
+      border: 1px solid #ccc;
+      background-color: #fff;
+      color: #000;
+      outline: none;
+      padding: 8px;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
+    }
 
-/* Khi có lỗi */
-.form-input.error {
-  border-color: #e74c3c; /* Viền đỏ */
-  /* Không thay đổi màu nền */
-}
+    /* Khi có lỗi */
+    .form-input.error {
+      border-color: #e74c3c;
+      /* Viền đỏ */
+      /* Không thay đổi màu nền */
+    }
 
-/* Thông báo lỗi */
-.error-message {
-  color: #e74c3c;
-  font-size: 0.875em;
-  margin-top: 4px;
-  display: none;
-}
+    /* Thông báo lỗi */
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.875em;
+      margin-top: 4px;
+      display: none;
+    }
   </style>
 </head>
 
@@ -167,36 +168,53 @@
           <input type="password" class="form-input" id="passwordMember" placeholder="••••••••" />
         </div>
         <button type="submit" class="btn-primary w-full gap-6 mt-4">Đăng nhập</button>
-        <button class="btn-secondary w-full mt-4" onclick="toggleRegister(event)">Đăng ký tài khoản mới</button>
+        <button class="btn-secondary w-full mt-4" onclick="showModal('register-modal')">Đăng ký tài khoản mới</button>
       </form>
     </div>
   </div>
 
   <!-- Phần đăng ký -->
-  <div class="hidden" id="register-section">
-    <button class="close-btn" onclick="closeRegister()">×</button>
-    <h3 class="text-sm font-semibold mb-2">Đăng ký tài khoản mới</h3>
-    <div class="form-group">
-        <label class="form-label">Họ tên</label>
-        <input type="text" class="form-input" id="registerFullName" placeholder="Your FullName" />
+  <div id="register-modal" class="modal">
+  <div class="modal-content p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-semibold text-gray-900">Đăng ký tài khoản mới</h3>
+      <button onclick="hideModal('register-modal')" class="text-gray-400 hover:text-gray-600">
+        <i data-lucide="x" class="h-6 w-6"></i>
+      </button>
     </div>
-    <div class="form-group">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-input" id="registerEmail" placeholder="newuser@example.com" />
-    </div>
-    <div class="form-group">
+
+    <!-- Form -->
+    <form id="register-form" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-input" id="registerUsername" name="username" placeholder="newuser" required>
+      </div>
+      
+      <div class="form-group">
         <label class="form-label">Mật khẩu</label>
-        <input type="password" class="form-input" id="registerPassword" placeholder="••••••••" />
-    </div>
-    <button class="btn-secondary w-full mt-4" onclick="handleRegister()">Đăng ký</button>
-    <div id="register-message" class="error-message" style="display:none;"></div>
+        <input type="password" class="form-input" id="registerPassword" name="password" placeholder="••••••••" required>
+      </div>
+      
+      <!-- Nút hành động -->
+      <div class="flex justify-end space-x-3 mt-4">
+        <button type="button" class="btn-secondary" onclick="hideModal('register-modal')">Hủy</button>
+        <button type="submit" class="btn-primary">Đăng ký</button>
+      </div>
+
+      <!-- Thông báo -->
+      <div id="register-message" class="error-message mt-3" style="display:none;"></div>
+    </form>
   </div>
+</div>
+
+
   <!-- bảng đky thành công -->
   <div id="register-success-modal" class="modal1" style="display:none;">
     <div class="modal1-content">
-        <h2>Đăng ký Tài khoản thành công!</h2>
-        <p>Tài khoản của bạn đã được tạo, bây giờ bạn có thể đăng nhập.</p>
-        <button onclick="closeRegisterSuccess()">OK</button>
+      <h2>Đăng ký Tài khoản thành công!</h2>
+      <p>Tài khoản của bạn đã được tạo, bây giờ bạn có thể đăng nhập.</p>
+      <button onclick="closeRegisterSuccess()">OK</button>
     </div>
   </div>
   <script src="/js/scriptLogin.js" defer></script>

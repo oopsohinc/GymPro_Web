@@ -28,4 +28,21 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post("/register", async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        let pool = await sql.connect(config);
+        await pool.request()
+            .input('username', sql.VarChar, username)
+            .input('password', sql.VarChar, password)
+            .query(`INSERT INTO Users (username, password, role) VALUES (@username, @password, 'member')`);
+
+        res.json({ success: true , message: 'Đăng ký thành công' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
 module.exports = router;

@@ -588,10 +588,13 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1.5rem;
+    justify-items: center;
 }
 
 .class-card {
     background: white;
+    width: 100%;
+    max-width: 360px;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

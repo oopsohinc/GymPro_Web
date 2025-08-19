@@ -7,10 +7,15 @@ const config = require('../db');
 router.get('/classes', async (req, res) => {
   try {
     const pool = await sql.connect(config);
-    const result = await pool.request().query('SELECT Classes.class_id, Classes.name, Classes.description, Classes.schedule, Classes.time, Classes.capacity,' +
-      'Classes.max_capacity, Trainers.trainer_id, Trainers.full_name, Levels.*' +
-      'FROM Classes JOIN Levels ON Classes.level_id = Levels.level_id JOIN' +
-      ' Trainers ON Classes.trainer_id = Trainers.trainer_id');
+    const result = await pool.request().query(`
+      SELECT	Classes.class_id, Classes.name, Classes.schedule, Classes.time, 
+              Classes.capacity, Classes.max_capacity, Trainers.trainer_id, 
+              Trainers.full_name, Trainers.specialization, Levels.*, Classes.description
+      FROM	Classes JOIN
+        Levels ON Classes.level_id = Levels.level_id JOIN
+        Trainers ON Classes.trainer_id = Trainers.trainer_id
+      order by Levels.level_id
+      `);
     res.json(result.recordset);
   } catch (err) {
     console.error('Lỗi khi lấy danh sách lớp học:', err);
@@ -24,6 +29,23 @@ router.get('/classes/levels', async (req, res) => {
     res.json(result.recordset);
   } catch (err) {
     console.error('Lỗi khi lấy danh sách cấp độ:', err);
+    res.status(500).send('Lỗi server');
+  }
+});
+router.get('/classes/members', async (req, res) => {
+try {
+    const pool = await sql.connect(config);
+    const result = await pool.request().query(`
+      SELECT	Classes.class_id, Classes.name, Classes.description, Classes.time, 
+              Classes.schedule, Classes.capacity, Classes.max_capacity, Classes.trainer_id, 
+              Classes.level_id, Member_Classes.user_id, Member_Classes.join_date, t.full_name
+      FROM	Classes INNER JOIN
+        Member_Classes ON Classes.class_id = Member_Classes.class_id join
+        Trainers t on Classes.trainer_id = t.trainer_id
+      `);
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Lỗi khi lấy danh sách thành viên lớp học:', err);
     res.status(500).send('Lỗi server');
   }
 });

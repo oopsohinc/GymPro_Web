@@ -329,24 +329,110 @@ function loadDashboard() {
 }
 async function loadDashboardAlt(userId) {
     try {
-        const responseProfile = await fetch(`http://localhost:3000/api/members/${userId}`);
-        const responseMemberships = await fetch('http://localhost:3000/api/stats');
-        if (!responseProfile.ok || !responseMemberships.ok) {
+        const [resProfile, resStats, resClasses, resClassesMembers] = await Promise.all([
+            fetch(`http://localhost:3000/api/members/${userId}`),
+            fetch('http://localhost:3000/api/stats'),
+            fetch('http://localhost:3000/api/classes'),
+            fetch(`http://localhost:3000/api/classes/members`)
+        ]);
+
+        if (!resProfile.ok || !resStats.ok || !resClasses.ok || !resClassesMembers.ok) {
             throw showToast('Error', 'Failed to load dashboard data.', 'error');
         }
-        const dataProfile = await responseProfile.json();
-        const dataMemberships = await responseMemberships.json();
 
-        // Update the dashboard with the fetched data
-        $('#active-membership').textContent = dataProfile.membership;
-        $('#classes-booked').textContent = dataMemberships.enrolled || 0;
-        $('#available-memberships').textContent = dataMemberships.totalMemberships || 0;
-        console.log(dataProfile, dataMemberships);
+        const dataProfile = await resProfile.json();
+        const dataStats = await resStats.json();
+        const dataClasses = await resClasses.json();
+        const dataClassesMembers = await resClassesMembers.json();
 
+        // === Cập nhật thống kê ===
+        $('#active-membership').textContent = dataProfile.membership || 'N/A';
+        $('#classes-booked').textContent = dataStats.enrolled || 0;
+        $('#available-memberships').textContent = dataStats.totalMemberships || 0;
+
+        // === Lọc lớp học hôm nay ===
+        const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' }); // Monday, Tuesday...
+        console.log('Today\'s name:', todayName);
+        const todaysClasses = dataClasses.filter(c => c.schedule === todayName);
+        const todaysClassesMembers = dataClassesMembers.filter(cm => cm.schedule === todayName);
+
+        const classesContainer = $('#classes-today');
+
+        if (todaysClasses.length === 0) {
+            classesContainer.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="class-meta mb-4">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2">
+                            <path d="M8 2v4"></path>
+                            <path d="M16 2v4"></path>
+                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                            <path d="M3 10h18"></path>
+                            <path d="M8 14h.01"></path>
+                            <path d="M12 14h.01"></path>
+                            <path d="M16 14h.01"></path>
+                            <path d="M8 18h.01"></path>
+                            <path d="M12 18h.01"></path>
+                            <path d="M16 18h.01"></path>
+                        </svg>
+                    </div>
+                    <p>No classes scheduled for today</p>
+                    <button class="btn-secondary mt-4" onclick="showPage('classes')">Browse Classes</button>
+                </div>
+            `;
+        } else {
+            // B1: Render khung thông tin lớp (không status)
+            classesContainer.innerHTML = todaysClasses.map(c => `
+                <div class="class-item" data-class-id="${c.id}">
+                    <div class="class-info">
+                        <h4>${c.name}</h4>
+                        <p>with ${c.full_name}</p>
+                        <p class="class-time">${formatTime(c.time)}</p>
+                    </div>
+                    <div class="class-status"></div> <!-- để chèn sau -->
+                </div>
+            `).join('');
+            todaysClasses.forEach(c => {
+                const cm = todaysClassesMembers.find(m => m.class_id == c.class_id);
+                const statusHtml = renderClassStatus(cm || {
+                    capacity: 0,
+                    max_capacity: c.max_capacity,
+                    user_id: null
+                }, userId);
+
+                const statusContainer = classesContainer.querySelector(
+                    `.class-item[data-class-id="${c.id}"] .class-status`
+                );
+                if (statusContainer) {
+                    statusContainer.innerHTML = statusHtml;
+                }
+            });
+
+        }
     } catch (error) {
         console.error('Error loading dashboard:', error);
     }
 }
+function renderClassStatus(cm, userId) {
+    if (cm.user_id == userId) {
+        return '<span class="badge badge-booked">Booked</span>';
+    }
+
+    if (cm.capacity >= cm.max_capacity) {
+        return '<span class="badge badge-full">Hết chỗ</span>';
+    }
+
+    if ((cm.max_capacity - cm.capacity) <= 2) {
+        return `
+            <span class="badge badge-warning">${cm.max_capacity - cm.capacity} chỗ trống</span>
+            <button class="btn-primary" onclick="showPage('classes')">Join Class</button>
+        `;
+    }
+
+    return `<button class="btn-primary" onclick="showPage('classes')">Join Class</button>`;
+}
+
+
 
 // Membership Functions
 // function loadMemberships() {
@@ -497,49 +583,92 @@ function processUpgrade() {
 }
 
 // Classes Functions
+let allClasses = [];
 async function loadClasses() {
     try {
         const response = await fetch('http://localhost:3000/api/classes');
-        const data = await response.json();
-        applyClassFilters(data);
+        const res = await fetch('http://localhost:3000/api/trainers');
+        if (!response.ok || !res.ok) {
+            throw showToast('Error', 'Failed to load classes.', 'error');
+        }
+        const dataClasses = await response.json();
+        const dataTrainers = await res.json();
+
+        // Load trainers in filter
+        const trainerFilter = $('#trainer-filter');
+        trainerFilter.innerHTML = '<option value="">All Instructors</option>' +
+            dataTrainers.map(trainer => `<option value="${trainer.trainer_id}">${trainer.full_name}</option>`).join('');
+
+        allClasses = dataClasses;
+
+        applyClassFilters();
     } catch (error) {
         console.error('Error loading classes:', error);
     }
 }
 
-function loadClasses() {
-    // Load trainers in filter
-    const trainerFilter = $('#trainer-filter');
-    trainerFilter.innerHTML = '<option value="">All Instructors</option>';
+// function loadClasses() {
+//     // Load trainers in filter
+//     const trainerFilter = $('#trainer-filter');
+//     trainerFilter.innerHTML = '<option value="">All Instructors</option>';
 
-    // Apply current filters
-    applyClassFilters();
-}
+//     // Apply current filters
+//     applyClassFilters();
+// }
 
-function applyClassFilters(classes) {
+function applyClassFilters() {
     const searchQuery = $('#search-classes').value.toLowerCase();
-    const categoryFilter = $('#category-filter').value;
+    // const categoryFilter = $('#category-filter').value;
     const trainerFilter = $('#trainer-filter').value;
+    const timeFilter = $('#time-filter').value; // morning, afternoon, evening
 
-    if (!classes) {
+    if (!Array.isArray(allClasses)) {
+        console.error('No classes data available to filter.');
         return;
     }
 
-    const filteredClasses = classes.filter(classItem => {
+    const filteredClasses = allClasses.filter(classItem => {
         const matchesSearch = !searchQuery ||
             classItem.name.toLowerCase().includes(searchQuery) ||
-            classItem.description.toLowerCase().includes(searchQuery);
+            (classItem.description || '').toLowerCase().includes(searchQuery);
 
-        const matchesCategory = !categoryFilter || classItem.level_name === categoryFilter;
+        // const matchesCategory = !categoryFilter || classItem.level_name === categoryFilter;
+        const matchesTrainer = !trainerFilter || String(classItem.trainer_id) === trainerFilter;
 
-        const matchesTrainer = !trainerFilter || classItem.trainer_id === trainerFilter;
+        const formattedTime = formatTime(classItem.time);
+        const [h, m] = formattedTime.split(':').map(Number);
+        const totalMinutes = h * 60 + m;
 
-        return matchesSearch && matchesCategory && matchesTrainer;
+        const matchesTime =
+            !timeFilter ||
+            (timeFilter === 'morning' && totalMinutes >= 5 * 60 && totalMinutes < 12 * 60) ||
+            (timeFilter === 'afternoon' && totalMinutes >= 12 * 60 && totalMinutes < 18 * 60) ||
+            (timeFilter === 'evening' && totalMinutes >= 18 * 60 && totalMinutes < 22 * 60);
+
+        return matchesSearch && matchesTrainer && matchesTime;
     });
 
     renderClasses(filteredClasses);
 }
 
+
+function formatTime(timeString) {
+    if (!timeString) return 'N/A';
+
+    try {
+        const date = new Date(timeString);
+        // Extract hours and minutes
+        const hours = date.getUTCHours().toString().padStart(2, '0');
+        const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    } catch (error) {
+        // Fallback for other formats
+        if (typeof timeString === 'string' && timeString.includes(':')) {
+            return timeString.substring(0, 5);
+        }
+        return 'N/A';
+    }
+}
 function renderClasses(classes) {
     const container = $('#classes-grid');
 
@@ -589,7 +718,7 @@ function renderClasses(classes) {
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12,6 12,12 16,14"></polyline>
                         </svg>
-                        <span>${classItem.time}</span>
+                        <span>${formatTime(classItem.time)}</span>
                     </div>
                     
                     <div class="class-meta">
@@ -601,8 +730,27 @@ function renderClasses(classes) {
                         </svg>
                         <span>${classItem.capacity}/${classItem.max_capacity} spots filled</span>
                     </div>
-                    
-                                        <p class="class-description">${classItem.description}</p>
+
+                    <div class="class-meta">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>${classItem.schedule || 'No schedule available'}</span>
+                    </div>
+
+                    <div class="class-meta">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M2 12h20"></path>
+                        </svg>
+                        <span>${classItem.level_name.toUpperCase() || 'No level specified'}</span>
+                    </div>
+
+                    <div class="class-description">
+                        <p>${classItem.description || 'No description available'}</p>
+                    </div>
                     
                     <button class="btn-primary" onclick="openBookingModal('${classItem.class_id}')" 
                             ${spotsLeft <= 0 ? 'disabled' : ''}>
@@ -747,7 +895,7 @@ async function confirmBooking() {
 //                 '<span class="badge badge-available">Available</span>'
 //             }
 //                     </h3>
-                    
+
 //                     <div class="class-meta">
 //                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 //                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -755,7 +903,7 @@ async function confirmBooking() {
 //                         </svg>
 //                         <span>${trainer ? trainer.name : 'Unknown Trainer'}</span>
 //                     </div>
-                    
+
 //                     <div class="class-meta">
 //                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 //                             <circle cx="12" cy="12" r="10"></circle>
@@ -763,7 +911,7 @@ async function confirmBooking() {
 //                         </svg>
 //                         <span>${classItem.duration} minutes</span>
 //                     </div>
-                    
+
 //                     <div class="class-meta">
 //                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 //                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -773,9 +921,9 @@ async function confirmBooking() {
 //                         </svg>
 //                         <span>${classItem.currentParticipants}/${classItem.maxParticipants} spots filled</span>
 //                     </div>
-                    
+
 //                     <p class="class-description">${classItem.description}</p>
-                    
+
 //                     <button class="btn-primary" onclick="openBookingModal('${classItem.id}')" 
 //                             ${spotsLeft <= 0 ? 'disabled' : ''}>
 //                         ${spotsLeft <= 0 ? 'Class Full' : 'Book Class'}
@@ -1045,7 +1193,9 @@ function handleQuickAction(action) {
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize Lucide icons
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
     // Navigation event listeners
     $$('[data-page]').forEach(link => {
         link.addEventListener('click', (e) => {
@@ -1067,8 +1217,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Class filters
     $('#search-classes').addEventListener('input', applyClassFilters);
-    $('#category-filter').addEventListener('change', applyClassFilters);
+    // $('#category-filter').addEventListener('change', applyClassFilters);
     $('#trainer-filter').addEventListener('change', applyClassFilters);
+    $('#time-filter').addEventListener('change', applyClassFilters);
 
     // Profile form
     $('#profile-form').addEventListener('submit', saveProfile);

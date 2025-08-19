@@ -82,7 +82,6 @@ function showAddMemberModal() {
             showNotification(data.message, 'success');
             loadMembersTable();
             hideModal('add-user-modal');
-            showModal('add-member-modal');
             e.target.reset();
         } catch (error) {
             
@@ -411,20 +410,12 @@ function setupFormHandlers() {
         const memberId = this.getAttribute('data-member-id');
         const formData = new FormData(e.target);
         const updatedMember = {};
-
+        console.log(formData);
         for (const [key, value] of formData.entries()) {
-            if (value.trim() !== '') {
-                if (key === 'date_of_birth') {
-                    if (!isValidDateFormat(value)) {
-                        showNotification('Invalid date format. Please use YYYY-MM-DD.', 'error');
-                        return;
-                    }
-                    updatedMember[key] = parseDateToISO(value.trim());
-                } else {
-                    updatedMember[key] = value.trim();
-                }
-            }
             console.log(`Key: ${key}, Value: ${value}`);
+            if (value.trim() !== '') {
+                updatedMember[key] = value.trim();
+            }
         }
         if (Object.keys(updatedMember).length === 0) {
             showNotification('No changes made to update.', 'error');

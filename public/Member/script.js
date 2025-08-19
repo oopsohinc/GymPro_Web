@@ -2,7 +2,7 @@
 
 // Mock Data - In a real application, this would come from an API
 const mockData = {
-  
+
 };
 
 // State Management
@@ -185,6 +185,9 @@ async function loadDashboardAlt(userId) {
         const todaysClasses = dataClasses.filter(c => c.schedule === todayName);
         const todaysClassesMembers = dataClassesMembers.filter(cm => cm.schedule === todayName);
 
+        console.log('Todays classes:', todaysClasses);
+        console.log('Todays classes members:', todaysClassesMembers);
+
         const classesContainer = $('#classes-today');
 
         if (todaysClasses.length === 0) {
@@ -210,39 +213,42 @@ async function loadDashboardAlt(userId) {
                 </div>
             `;
         } else {
-            // B1: Render khung thông tin lớp (không status)
-            classesContainer.innerHTML = todaysClasses.map(c => `
-                <div class="class-item" data-class-id="${c.id}">
-                    <div class="class-info">
-                        <h4>${c.name}</h4>
-                        <p>with ${c.full_name}</p>
-                        <p class="class-time">${formatTime(c.time)}</p>
-                    </div>
-                    <div class="class-status"></div> <!-- để chèn sau -->
+            classesContainer.innerHTML = todaysClasses.map(c => {
+                const classId = c.class_id; // đảm bảo dùng đúng key
+                return `
+            <div class="class-item" data-class-id="${classId}">
+                <div class="class-info">
+                    <h4>${c.name}</h4>
+                    <p>with ${c.full_name}</p>
+                    <p class="class-time">${formatTime(c.time)}</p>
                 </div>
-            `).join('');
+                <div class="class-status"></div> <!-- để chèn sau -->
+            </div>
+        `;
+            }).join('');
+
             todaysClasses.forEach(c => {
-                const cm = todaysClassesMembers.find(m => m.class_id == c.class_id);
-                const statusHtml = renderClassStatus(cm || {
-                    capacity: 0,
-                    max_capacity: c.max_capacity,
-                    user_id: null
-                }, userId);
+                const classId = c.class_id;
+                const cm = todaysClassesMembers.find(m => m.class_id === classId);
+                const statusHtml = renderClassStatus(cm, userId);
 
                 const statusContainer = classesContainer.querySelector(
-                    `.class-item[data-class-id="${c.id}"] .class-status`
+                    `.class-item[data-class-id="${classId}"] .class-status`
                 );
                 if (statusContainer) {
                     statusContainer.innerHTML = statusHtml;
                 }
             });
-
         }
     } catch (error) {
         console.error('Error loading dashboard:', error);
     }
 }
 function renderClassStatus(cm, userId) {
+    if (!cm) {
+        return `<button class="btn-primary" onclick="showPage('classes')">Join Class</button>`;
+    }
+
     if (cm.user_id == userId) {
         return '<span class="badge badge-booked">Booked</span>';
     }
@@ -260,6 +266,8 @@ function renderClassStatus(cm, userId) {
 
     return `<button class="btn-primary" onclick="showPage('classes')">Join Class</button>`;
 }
+
+
 
 
 
@@ -904,7 +912,7 @@ function formatScheduleDate(dateStr) {
 }
 // Modal overlay click to close
 if (logoutLink) {
-    logoutLink.addEventListener('click', function(e) {
+    logoutLink.addEventListener('click', function (e) {
         e.preventDefault();
         window.location.href = '/login.html';
     });

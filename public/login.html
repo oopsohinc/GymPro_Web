@@ -168,7 +168,7 @@
           <input type="password" class="form-input" id="passwordMember" placeholder="••••••••" />
         </div>
         <button type="submit" class="btn-primary w-full gap-6 mt-4">Đăng nhập</button>
-        <button class="btn-secondary w-full mt-4" onclick="showModal('register-modal')">Đăng ký tài khoản mới</button>
+        <button type="button" class="btn-secondary w-full mt-4" onclick="showModal('register-modal')">Đăng ký tài khoản mới</button>
       </form>
     </div>
   </div>
@@ -185,15 +185,15 @@
     </div>
 
     <!-- Form -->
-    <form id="register-form" onsubmit="handleRegister(event)">
+    <form id="register-form">
       <div class="form-group">
         <label class="form-label">Username</label>
-        <input type="text" class="form-input" id="registerUsername" name="username" placeholder="newuser" required>
+        <input type="text" class="form-input" id="registerUsername" placeholder="newuser" required>
       </div>
       
       <div class="form-group">
         <label class="form-label">Mật khẩu</label>
-        <input type="password" class="form-input" id="registerPassword" name="password" placeholder="••••••••" required>
+        <input type="password" class="form-input" id="registerPassword" placeholder="••••••••" required>
       </div>
       
       <!-- Nút hành động -->

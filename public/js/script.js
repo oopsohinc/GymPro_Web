@@ -84,7 +84,7 @@ function showAddMemberModal() {
             hideModal('add-user-modal');
             e.target.reset();
         } catch (error) {
-            
+
         }
     });
 }
@@ -370,7 +370,7 @@ function showWIP(id) {
 
 // Xử lý gửi form
 function setupFormHandlers() {
-    
+
     document.getElementById('add-member-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -593,28 +593,6 @@ function setupFormHandlers() {
         }
     });
 
-    document.getElementById('add-payment-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const memberId = parseInt(formData.get('memberId'));
-        const member = mockData.members.find(m => m.id === memberId);
-        const newPayment = {
-            id: mockData.payments.length + 1,
-            memberId: memberId,
-            memberName: member.name,
-            amount: formData.get('amount'),
-            dueDate: formData.get('dueDate'),
-            status: formData.get('status'),
-            paymentDate: formData.get('status') === 'Paid' ? new Date().toISOString().split('T')[0] : null,
-            memberAvatar: member.avatar
-        };
-        mockData.payments.push(newPayment);
-        loadPaymentsTable();
-        hideModal('add-payment-modal');
-        e.target.reset();
-        alert('Payment recorded successfully!');
-    });
-
     document.getElementById("addMembershipForm").addEventListener("submit", async function (e) {
         e.preventDefault();
 
@@ -704,6 +682,9 @@ function initializeApp() {
     loadTrainers();
     loadScheduleTable();
     loadPaymentsTable();
+
+    // Handle VNPay response
+    handleVNPayResponse();
 }
 
 async function loadStats() {
@@ -1081,58 +1062,197 @@ async function loadScheduleTable() {
 }
 
 // Load payment
-function formatDateUTC(isoString) {
-  if (!isoString) return '—'; // xử lý giá trị null hoặc undefined
+async function handlePayment(paymentId) {
+    try {
+        console.log(`Handling payment for ID: ${paymentId}`);
 
-  const date = new Date(isoString);
-  if (isNaN(date)) return 'Invalid Date';
+        // Bước 1: Lấy thông tin đơn hàng
+        const resPayment = await fetch(`http://localhost:3000/api/payments/${paymentId}`);
+        if (!resPayment.ok) throw new Error('Không thể lấy thông tin đơn hàng.');
 
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const year = date.getUTCFullYear();
+        const payment = await resPayment.json();
+        if (!payment || !payment.amount) {
+            alert('Không tìm thấy thông tin thanh toán.');
+            return;
+        }
 
-  return `${day}-${month}-${year}`;
+        // Bước 2: Gửi thông tin sang API tạo QR
+        const resQR = await fetch('http://localhost:3000/api/payments/create-qr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                paymentId: payment.id,
+                amount: payment.amount,
+                full_name: payment.full_name,
+                orderInfo: `Thanh toán cho ${payment.full_name}`,
+            }),
+        });
+
+        if (!resQR.ok) throw new Error('Không thể tạo mã QR thanh toán.');
+
+        const data = await resQR.json();
+
+        // Nếu có link thanh toán VNPay thì mở
+        if (data.vnpayResponse) {
+            window.open(data.vnpayResponse, '_blank');
+        } else {
+            alert('Không thể tạo mã QR thanh toán.');
+        }
+    } catch (err) {
+        console.error('Lỗi trong quá trình thanh toán:', err);
+        alert('Đã xảy ra lỗi khi xử lý thanh toán!');
+    }
+}
+async function handleVNPayResponse() {
+    try {
+        const queryString = window.location.href.split('?')[1];
+        if (!queryString) return;
+
+        const params = new URLSearchParams(queryString);
+        const responseCode = params.get('vnp_ResponseCode');
+        const txnRef = params.get('vnp_TxnRef'); // dạng: txn16_1
+        const paymentId = txnRef ? txnRef.split('_')[1] : null;
+
+        const errorMessages = {
+            '00': 'Giao dịch thành công',
+            '07': 'Trừ tiền thành công nhưng giao dịch bị nghi ngờ.',
+            '09': 'Thẻ/Tài khoản chưa đăng ký InternetBanking.',
+            '10': 'Xác thực thông tin sai quá 3 lần.',
+            '11': 'Đã hết hạn chờ thanh toán. Vui lòng thử lại.',
+            '12': 'Thẻ/Tài khoản đã bị khóa.',
+            '13': 'Sai OTP. Vui lòng thử lại.',
+            '24': 'Khách hàng đã hủy giao dịch.',
+            '51': 'Tài khoản không đủ số dư.',
+            '65': 'Tài khoản vượt hạn mức giao dịch trong ngày.',
+            '75': 'Ngân hàng đang bảo trì.',
+            '79': 'Sai mật khẩu thanh toán quá số lần.',
+            '99': 'Lỗi khác. Vui lòng thử lại sau.',
+        };
+
+        if (responseCode) {
+            const message = errorMessages[responseCode] || `Lỗi không xác định (ResponseCode: ${responseCode})`;
+
+            if (responseCode === '00') {
+                // ✅ Thành công → gọi API cập nhật status
+                if (paymentId) {
+                    try {
+                        await fetch(`http://localhost:3000/api/payments/${paymentId}/status`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ status: '1' })
+                        });
+                        showNotification('✅ ' + message + ' (Đơn hàng #' + paymentId + ' đã cập nhật thành công).', 'success');
+                        showPage('payments');
+                        loadPaymentsTable();
+                    } catch (err) {
+                        console.error('Lỗi khi cập nhật trạng thái payment:', err);
+                        showNotification('✅ ' + message + ' nhưng cập nhật trạng thái thất bại.', 'error');
+                    }
+                } else {
+                    showNotification('✅ ' + message, 'success');
+                }
+            } else {
+                showNotification('❌ ' + message, 'error');
+            }
+        }
+    } catch (err) {
+        console.error('Lỗi khi xử lý VNPay callback:', err);
+    }
 }
 
+function formatDateUTC(isoString) {
+    if (!isoString) return '—'; // xử lý giá trị null hoặc undefined
+
+    const date = new Date(isoString);
+    if (isNaN(date)) return 'Invalid Date';
+
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+
+    return `${day}-${month}-${year}`;
+}
+
+
+// async function loadPaymentsTable() {
+//     try {
+//         const res = await fetch("http://localhost:3000/api/payments");
+//         const payments = await res.json();
+//         console.log(payments);
+//         const tbody = document.getElementById('payments-table');
+//         tbody.innerHTML = '';
+
+//         payments.forEach(payment => {
+//             const row = document.createElement('tr');
+//             // const formattedDate = formatDateUTC(payment.payment_date);
+//             // const statusBadge = payment.status === 'Paid' ? 'badge-success' :
+//             //     payment.status === 'Pending' ? 'badge-warning' : 'badge-error';
+//             row.innerHTML = `
+//                 <td>
+//                     <div class="flex items-center">
+//                         <div class="font-medium text-gray-900">${payment.full_name}</div>
+//                     </div>
+//                 </td>
+//                 <td class="font-medium">${payment.amount.toLocaleString('vi-VN')}₫</td>
+//                 <td>${payment.dueDate}</td>
+//                 <td>
+//                     <span class="${payment.payment_status === true ? 'badge badge-success' : 'badge badge-error'}">
+//                         ${payment.payment_status === true ? 'Đã thanh toán' : 'Chưa thanh toán'}
+//                     </span>
+//                 </td>
+//                 <td>${payment.payment_date || '-'}</td>
+//                 <td>
+
+//                 </td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+//     } catch (err) {
+//         console.error("Error loading payments:", err);
+//     }
+// }
 
 async function loadPaymentsTable() {
     try {
         const res = await fetch("http://localhost:3000/api/payments");
         const payments = await res.json();
         console.log(payments);
+
         const tbody = document.getElementById('payments-table');
         tbody.innerHTML = '';
 
         payments.forEach(payment => {
             const row = document.createElement('tr');
-            // const formattedDate = formatDateUTC(payment.payment_date);
-            // const statusBadge = payment.status === 'Paid' ? 'badge-success' :
-            //     payment.status === 'Pending' ? 'badge-warning' : 'badge-error';
+
+            // Tạo nút thanh toán nếu chưa thanh toán
+            const actionButton = payment.payment_status === false
+                ? `<button class="btn btn-primary" onclick="handlePayment('${payment.id}')">Thanh toán</button>`
+                : '';
+
             row.innerHTML = `
-                <td>
-                    <div class="flex items-center">
-                        <div class="font-medium text-gray-900">${payment.full_name}</div>
-                    </div>
-                </td>
-                <td class="font-medium">${payment.amount.toLocaleString('vi-VN')}₫</td>
-                <td>${payment.dueDate}</td>
-                <td>
-                    <span class="${payment.payment_status === true ? 'badge badge-success' : 'badge badge-error'}">
-                        ${payment.payment_status === true ? 'Đã thanh toán' : 'Chưa thanh toán'}
-                    </span>
-                </td>
-                <td>${payment.payment_date || '-'}</td>
-                <td>
-                    <button class="btn-secondary mr-2">Edit</button>
-                    <button class="btn-secondary">Delete</button>
-                </td>
-            `;
+        <td>
+          <div class="flex items-center">
+            <div class="font-medium text-gray-900">${payment.full_name}</div>
+          </div>
+        </td>
+        <td class="font-medium">${payment.amount.toLocaleString('vi-VN')}₫</td>
+        <td>${payment.dueDate}</td>
+        <td>
+          <span class="${payment.payment_status === true ? 'badge badge-success' : 'badge badge-error'}">
+            ${payment.payment_status === true ? 'Đã thanh toán' : 'Chưa thanh toán'}
+          </span>
+        </td>
+        <td>${payment.payment_date || '-'}</td>
+        <td>${actionButton}</td>
+      `;
+
             tbody.appendChild(row);
         });
     } catch (err) {
         console.error("Error loading payments:", err);
     }
 }
+
 
 function showAddMembershipModal() {
     document.getElementById("addMembershipModal").classList.remove("hidden");

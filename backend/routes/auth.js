@@ -41,7 +41,7 @@ router.post("/register", async (req, res) => {
         res.json({ success: true , message: 'Đăng ký thành công' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ success: false, message: 'Lỗi server' });
+        res.status(500).json({ success: false, message: 'Trùng tài khoản, vui lòng chọn tên đăng nhập khác' });
     }
 });
 

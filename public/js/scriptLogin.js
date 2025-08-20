@@ -130,8 +130,8 @@ async function loginMember(username, password) {
 }
 
 async function loginOwner(username, password) {
-    const usernameInput = document.getElementById("username");
-    const passwordInput = document.getElementById("password");
+    const usernameInput = document.getElementById("usernameMember");
+    const passwordInput = document.getElementById("passwordMember");
     const usernameError = document.getElementById("username-error");
     const passwordError = document.getElementById("password-error");
 
@@ -204,6 +204,7 @@ async function registerUser(username, password) {
         if (data.success) {
             showModal('register-success-modal');
             hideModal('register-modal');
+            handleRegister();
         } else {
             registerMessage.textContent = data.message || "Đăng ký không thành công";
             registerMessage.style.display = "block";
@@ -235,3 +236,15 @@ document.getElementById("register-form").addEventListener("submit", async functi
     const password = document.getElementById("registerPassword").value;
     await registerUser(username, password);
 });
+
+// document.addEventListener("DOMContentLoaded", function () {
+//     // Initialize tooltips or any other JavaScript here
+//     lucide.createIcons();
+
+//     document.getElementById("username").textContent = " ";
+//     document.getElementById("password").textContent = " ";
+//     document.getElementById("usernameMember").textContent = " ";
+//     document.getElementById("passwordMember").textContent = " ";
+//     document.getElementById("registerUsername").textContent = " ";
+//     document.getElementById("registerPassword").textContent = " ";
+// });

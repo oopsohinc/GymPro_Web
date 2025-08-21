@@ -267,83 +267,104 @@ function renderClassStatus(cm, userId) {
     return `<button class="btn-primary" onclick="showPage('classes')">Join Class</button>`;
 }
 
-
-
-
-
 // Membership Functions
-// function loadMemberships() {
-//     const container = $('#memberships-grid');
-//     container.innerHTML = mockData.memberships.map(membership => `
-//         <div class="membership-card ${membership.popular ? 'popular' : ''} ${membership.current ? 'current' : ''}">
-//             ${membership.current ? '<div class="membership-popular-badge">Current Plan</div>' : ''}
-//             ${membership.popular && !membership.current ? '<div class="membership-popular-badge">Most Popular</div>' : ''}
+async function checkMembershipStatus() {
+    try {
+        const response = await fetch(`http://localhost:3000/api/memberships/user/${userId}`);
+        if (!response.ok) {
+            throw showToast('Error', 'Failed to check membership status.', 'error');
+        }
+        const data = await response.json();
+        const purchasedIds = data.map(item => Number(item.membership_id));
+        return purchasedIds;
+    } catch (error) {
+        showToast('Error', 'Error checking membership status.', 'error');
+        return null;
+    }
+}
 
-//             <div class="membership-header">
-//                 <h3>${membership.name}</h3>
-//                 <div class="membership-price">
-//                     $${membership.price}
-//                     <span class="period">/month</span>
-//                 </div>
-//             </div>
-
-//             <p>${membership.description}</p>
-
-//             <ul class="membership-features">
-//                 ${membership.features.map(feature => `
-//                     <li>
-//                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-//                             <path d="M20 6L9 17l-5-5"></path>
-//                         </svg>
-//                         ${feature}
-//                     </li>
-//                 `).join('')}
-//             </ul>
-
-//             ${membership.current ?
-//             '<button class="btn-secondary" disabled>Current Plan</button>' :
-//             `<button class="btn-primary" onclick="openUpgradeModal('${membership.id}')">
-//                     ${membership.name === 'Elite' ? 'Upgrade Now' : 'Select Plan'}
-//                 </button>`
-//         }
-//         </div>
-//     `).join('');
-// }
 async function loadMemberships() {
     try {
+        // Gọi API lấy danh sách tất cả Memberships
         const response = await fetch('http://localhost:3000/api/memberships');
         if (!response.ok) {
             throw showToast('Error', 'Failed to load memberships.', 'error');
         }
-        const data = await response.json();
-        // Update the UI with the fetched memberships
-        $('#memberships-grid').innerHTML = data.map(membership => `
-            <div class="membership-card">
-                <div class="membership-header">
-                    <h3>${membership.name}</h3>
-                    <div class="membership-price">
-                        ${membership.price.toLocaleString('vi-VN')}₫
-                        <span class="period">/ ${membership.duration / 30} month</span>
-                    </div>
-                </div>
-                <p>No description available</p>
-                <ul class="membership-features">
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 6L9 17l-5-5"></path>
-                        </svg>
-                        No features available
-                    </li>
-                </ul>
-                <button class="btn-primary" onclick="openUpgradeModal('${membership.id}')">
-                    Select Plan
-                </button>
+        const memberships = await response.json();
+
+        // Gọi API lấy Memberships mà user đã mua
+        const purchasedIds = await checkMembershipStatus();
+
+        // Render UI
+        $('#memberships-grid').innerHTML = memberships.map(membership => {
+            const isPurchased = purchasedIds.includes(Number(membership.membership_id));
+            console.log('Membership:', membership);
+            return `
+        <div class="membership-card">
+          <div class="membership-header">
+            <h3>${membership.name}</h3>
+            <div class="membership-price">
+              ${membership.price.toLocaleString('vi-VN')}₫
+              <span class="period">/ ${membership.duration / 30} month</span>
             </div>
-        `).join('');
+          </div>
+          <p>No description available</p>
+          <ul class="membership-features">
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+              No features available
+            </li>
+          </ul>
+          ${isPurchased
+                    ? `<button class="btn-secondary" disabled>Purchased</button>`
+                    : `<button class="btn-primary" onclick='openUpgrade("${encodeURIComponent(JSON.stringify(membership))}")'>Select Plan</button>
+`
+                }
+        </div>
+      `;
+        }).join('');
     } catch (error) {
         console.error('Error loading memberships:', error);
     }
 }
+
+// async function loadMemberships() {
+//     try {
+//         const response = await fetch('http://localhost:3000/api/memberships');
+//         if (!response.ok) {
+//             throw showToast('Error', 'Failed to load memberships.', 'error');
+//         }
+//         const data = await response.json();
+//         // Update the UI with the fetched memberships
+//         $('#memberships-grid').innerHTML = data.map(membership => `
+//             <div class="membership-card">
+//                 <div class="membership-header">
+//                     <h3>${membership.name}</h3>
+//                     <div class="membership-price">
+//                         ${membership.price.toLocaleString('vi-VN')}₫
+//                         <span class="period">/ ${membership.duration / 30} month</span>
+//                     </div>
+//                 </div>
+//                 <p>No description available</p>
+//                 <ul class="membership-features">
+//                     <li>
+//                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//                             <path d="M20 6L9 17l-5-5"></path>
+//                         </svg>
+//                         No features available
+//                     </li>
+//                 </ul>
+//                 <button class="btn-primary" onclick="openUpgradeModal('${membership.id}')">
+//                     Select Plan
+//                 </button>
+//             </div>
+//         `).join('');
+//     } catch (error) {
+//         console.error('Error loading memberships:', error);
+//     }
+// }
 
 function openUpgradeModal(membershipId) {
     selectedMembership = mockData.memberships.find(m => m.id === membershipId);
@@ -373,6 +394,151 @@ function openUpgradeModal(membershipId) {
     `;
 
     openModal('membership-upgrade-modal');
+}
+async function openUpgrade(encodedMembership) {
+    try {
+        const membership = JSON.parse(decodeURIComponent(encodedMembership));
+        console.log(`Upgrading to membership: ${membership.name}`);
+        const confirmation = confirm(`Are you sure you want to upgrade to the ${membership.name} membership?`);
+        if (!confirmation) return;
+
+        showLoading();
+
+        // Proceed with the upgrade process
+        setTimeout(async () => {
+            const resPayment = await fetch(`http://localhost:3000/api/payments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, membershipId: membership.membership_id, amount: membership.price })
+            });
+            if (!resPayment.ok) {
+                throw showToast('Error', 'Failed to update payment information.', 'error');
+            }
+            const data = await resPayment.json();
+
+            const payment = {
+                userId: userId,
+                paymentId: data.paymentId,
+                membershipId: membership.membership_id,
+                amount: membership.price
+            };
+            const res = await handlePayment(payment);
+            
+            if (!res) {
+                showToast('Error', 'Failed to re-up membership.', 'error');
+            }
+            
+            hideLoading();
+        }, 500);
+    } catch (error) {
+        showToast('Error', 'Failed to upgrade membership.', 'error');
+    }
+}
+async function handlePayment(payment) {
+    try {
+        console.log(`Handling payment for ID: ${payment}`);
+
+        // Bước 1: Lấy thông tin đơn hàng
+        // const resPayment = await fetch(`http://localhost:3000/api/payments/${paymentId}`);
+        // if (!resPayment.ok) throw new Error('Không thể lấy thông tin đơn hàng.');
+
+        // const payment = await resPayment.json();
+        // if (!payment || !payment.amount) {
+        //     alert('Không tìm thấy thông tin thanh toán.');
+        //     return;
+        // }
+
+        // Bước 2: Gửi thông tin sang API tạo QR
+        const resQR = await fetch('http://localhost:3000/api/payments/members/create-qr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: payment.userId,
+                paymentId: payment.paymentId,
+                amount: payment.amount,
+                orderInfo: `Thanh toán cho ${payment.userId} - ${payment.membershipId}`,
+            }),
+        });
+
+        if (!resQR.ok) throw new Error('Không thể tạo mã QR thanh toán.');
+
+        const data = await resQR.json();
+
+        // Nếu có link thanh toán VNPay thì mở
+        if (data.vnpayResponse) {
+            window.open(data.vnpayResponse, '_blank');
+        } else {
+            alert('Không thể tạo mã QR thanh toán.');
+        }
+    } catch (err) {
+        console.error('Lỗi trong quá trình thanh toán:', err);
+        alert('Đã xảy ra lỗi khi xử lý thanh toán!');
+    }
+}
+async function handleVNPayResponse() {
+    try {
+        const queryString = window.location.href.split('?')[1];
+        if (!queryString) return;
+
+        const params = new URLSearchParams(queryString);
+
+        // ✅ Lấy userId từ query
+        const userId = params.get('id');
+
+        // ✅ Lấy thông tin VNPay trả về
+        const responseCode = params.get('vnp_ResponseCode');
+        const txnRef = params.get('vnp_TxnRef'); // dạng: txn_16_1
+        const paymentId = txnRef ? txnRef.split('_')[1] : null;
+
+        const errorMessages = {
+            '00': 'Giao dịch thành công',
+            '07': 'Trừ tiền thành công nhưng giao dịch bị nghi ngờ.',
+            '09': 'Thẻ/Tài khoản chưa đăng ký InternetBanking.',
+            '10': 'Xác thực thông tin sai quá 3 lần.',
+            '11': 'Đã hết hạn chờ thanh toán. Vui lòng thử lại.',
+            '12': 'Thẻ/Tài khoản đã bị khóa.',
+            '13': 'Sai OTP. Vui lòng thử lại.',
+            '24': 'Khách hàng đã hủy giao dịch.',
+            '51': 'Tài khoản không đủ số dư.',
+            '65': 'Tài khoản vượt hạn mức giao dịch trong ngày.',
+            '75': 'Ngân hàng đang bảo trì.',
+            '79': 'Sai mật khẩu thanh toán quá số lần.',
+            '99': 'Lỗi khác. Vui lòng thử lại sau.',
+        };
+
+        if (responseCode) {
+            const message = errorMessages[responseCode] || `Lỗi không xác định (ResponseCode: ${responseCode})`;
+
+            if (responseCode === '00') {
+                // ✅ Thành công → gọi API cập nhật status
+                if (paymentId) {
+                    try {
+                        await fetch(`http://localhost:3000/api/payments/${paymentId}/status`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ status: '1', userId }) // gửi kèm userId nếu cần
+                        });
+
+                        showToast(`✅ ${message} (Đơn hàng #${paymentId} đã cập nhật thành công).`, 'success');
+
+                        // Sau khi cập nhật thì load lại dữ liệu
+                        showPage('memberships');
+                        loadMemberships();
+
+                    } catch (err) {
+                        console.error('Lỗi khi cập nhật trạng thái payment:', err);
+                        showToast(`✅ ${message} nhưng cập nhật trạng thái thất bại.`, 'error');
+                    }
+                } else {
+                    showToast('✅ ' + message, 'success');
+                }
+            } else {
+                showToast('❌ ' + message, 'error');
+            }
+        }
+    } catch (err) {
+        console.error('Lỗi khi xử lý VNPay callback:', err);
+    }
 }
 
 function processUpgrade() {
@@ -444,15 +610,6 @@ async function loadClasses() {
         console.error('Error loading classes:', error);
     }
 }
-
-// function loadClasses() {
-//     // Load trainers in filter
-//     const trainerFilter = $('#trainer-filter');
-//     trainerFilter.innerHTML = '<option value="">All Instructors</option>';
-
-//     // Apply current filters
-//     applyClassFilters();
-// }
 
 function applyClassFilters() {
     const searchQuery = $('#search-classes').value.toLowerCase();
@@ -666,181 +823,6 @@ async function confirmBooking() {
         console.error('Error booking class:', error);
     }
 }
-
-// function loadClasses() {
-//     // Load trainers in filter
-//     const trainerFilter = $('#trainer-filter');
-//     trainerFilter.innerHTML = '<option value="">All Instructors</option>' +
-//         mockData.trainers.map(trainer => `<option value="${trainer.id}">${trainer.name}</option>`).join('');
-
-//     // Apply current filters
-//     applyClassFilters();
-// }
-
-// function applyClassFilters() {
-//     const searchQuery = $('#search-classes').value.toLowerCase();
-//     const categoryFilter = $('#category-filter').value;
-//     const trainerFilter = $('#trainer-filter').value;
-
-//     filteredClasses = mockData.classes.filter(classItem => {
-//         const matchesSearch = !searchQuery ||
-//             classItem.name.toLowerCase().includes(searchQuery) ||
-//             classItem.description.toLowerCase().includes(searchQuery);
-
-//         const matchesCategory = !categoryFilter || classItem.category === categoryFilter;
-
-//         const matchesTrainer = !trainerFilter || classItem.trainerId === trainerFilter;
-
-//         return matchesSearch && matchesCategory && matchesTrainer;
-//     });
-
-//     renderClasses();
-// }
-
-// function renderClasses() {
-//     const container = $('#classes-grid');
-
-//     if (filteredClasses.length === 0) {
-//         container.innerHTML = `
-//             <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
-//                 <div class="class-meta mb-4">
-//                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-//                         <circle cx="11" cy="11" r="8"></circle>
-//                         <path d="M21 21l-4.35-4.35"></path>
-//                     </svg>
-//                 </div>
-//                 <h3>No classes found</h3>
-//                 <p>Try adjusting your search criteria to find more classes.</p>
-//             </div>
-//         `;
-//         return;
-//     }
-
-//     container.innerHTML = filteredClasses.map(classItem => {
-//         const trainer = mockData.trainers.find(t => t.id === classItem.trainerId);
-//         const spotsLeft = classItem.maxParticipants - classItem.currentParticipants;
-
-//         return `
-//             <div class="card class-card">
-//                 <div class="class-image">
-//                     ${classItem.name}
-//                 </div>
-//                 <div class="class-details">
-//                     <h3>
-//                         ${classItem.name}
-//                         ${spotsLeft <= 2 ?
-//                 `<span class="badge badge-warning">${spotsLeft} spots left</span>` :
-//                 '<span class="badge badge-available">Available</span>'
-//             }
-//                     </h3>
-
-//                     <div class="class-meta">
-//                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-//                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-//                             <circle cx="12" cy="7" r="4"></circle>
-//                         </svg>
-//                         <span>${trainer ? trainer.name : 'Unknown Trainer'}</span>
-//                     </div>
-
-//                     <div class="class-meta">
-//                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-//                             <circle cx="12" cy="12" r="10"></circle>
-//                             <polyline points="12,6 12,12 16,14"></polyline>
-//                         </svg>
-//                         <span>${classItem.duration} minutes</span>
-//                     </div>
-
-//                     <div class="class-meta">
-//                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-//                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-//                             <circle cx="9" cy="7" r="4"></circle>
-//                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-//                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-//                         </svg>
-//                         <span>${classItem.currentParticipants}/${classItem.maxParticipants} spots filled</span>
-//                     </div>
-
-//                     <p class="class-description">${classItem.description}</p>
-
-//                     <button class="btn-primary" onclick="openBookingModal('${classItem.id}')" 
-//                             ${spotsLeft <= 0 ? 'disabled' : ''}>
-//                         ${spotsLeft <= 0 ? 'Class Full' : 'Book Class'}
-//                     </button>
-//                 </div>
-//             </div>
-//         `;
-//     }).join('');
-// }
-
-// function openBookingModal(classId) {
-//     selectedClass = mockData.classes.find(c => c.id === classId);
-//     if (!selectedClass) return;
-
-//     const trainer = mockData.trainers.find(t => t.id === selectedClass.trainerId);
-
-//     $('#booking-class-name').textContent = selectedClass.name;
-//     $('#booking-trainer-name').textContent = `with ${trainer ? trainer.name : 'Unknown Trainer'}`;
-
-//     // Generate time slots
-//     const timeSlotsContainer = $('#time-slots');
-//     timeSlotsContainer.innerHTML = selectedClass.schedules.map((schedule, index) => `
-//         <div class="time-slot">
-//             <input type="radio" name="timeSlot" value="${index}" id="slot-${index}">
-//             <label for="slot-${index}" class="time-slot-info">
-//                 <div class="time-slot-label">
-//                     ${schedule.date === 'today' ? 'Today' :
-//             schedule.date === 'tomorrow' ? 'Tomorrow' :
-//                 schedule.date.charAt(0).toUpperCase() + schedule.date.slice(1)} - ${schedule.time}
-//                 </div>
-//                 <div class="time-slot-spots">${schedule.spots} spots available</div>
-//             </label>
-//         </div>
-//     `).join('');
-
-//     openModal('class-booking-modal');
-// }
-
-// function confirmBooking() {
-//     const selectedSlot = $('input[name="timeSlot"]:checked');
-
-//     if (!selectedSlot) {
-//         showToast('Error', 'Please select a time slot.', 'error');
-//         return;
-//     }
-
-//     showLoading();
-
-//     // Simulate API call
-//     setTimeout(() => {
-//         hideLoading();
-
-//         // Update class as booked in today's classes if it's a today slot
-//         const slotIndex = parseInt(selectedSlot.value);
-//         const selectedSchedule = selectedClass.schedules[slotIndex];
-
-//         if (selectedSchedule.date === 'today') {
-//             const todayClass = mockData.todaysClasses.find(c => c.name === selectedClass.name);
-//             if (todayClass) {
-//                 todayClass.isBooked = true;
-//             }
-//         }
-//         // Thêm lịch vào bảng Schedule
-//         addScheduleRow(
-//             selectedClass.name,
-//             selectedSchedule.date,
-//             selectedSchedule.time,
-//             (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
-//             "Registered"
-//         );
-//         showToast('Success', 'Class booked successfully!');
-//         closeModal('class-booking-modal');
-
-//         // Refresh dashboard if currently on dashboard
-//         if (currentPage === 'dashboard') {
-//             loadDashboard();
-//         }
-//     }, 1500);
-// }
 
 // Schedule function
 function addScheduleRow(className, date, time, trainer, status = "Registered") {
@@ -1111,6 +1093,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initial page load
     loadDashboardAlt(userId);
+
+    handleVNPayResponse();
 });
 
 // Global functions for onclick handlers

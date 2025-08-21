@@ -14,6 +14,25 @@ router.get('/memberships', async (req, res) => {
     res.status(500).send('Lỗi server');
   }
 });
+router.get('/memberships/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input('userId', userId)
+      .query(`
+        SELECT membership_id 
+        FROM Member_Memberships 
+        WHERE user_id = @userId
+      `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Error fetching user memberships:', err);
+    res.status(500).json({ error: 'Failed to fetch user memberships' });
+  }
+});
+
 
 // Thêm membership mới
 router.post('/memberships', async (req, res) => {
@@ -46,6 +65,24 @@ router.post('/memberships', async (req, res) => {
     res.status(500).send('Lỗi server');
   }
 });
+// router.post('/memberships/user/:userId', async (req, res) => {
+//   const { userId } = req.params;
+//   const { membershipId } = req.body;
+//   try {
+//     const pool = await sql.connect(config);
+//     await pool.request()
+//       .input('userId', sql.Int, userId)
+//       .input('membershipId', sql.Int, membershipId)
+//       .query(`
+//         INSERT INTO Member_Memberships (user_id, membership_id) 
+//         VALUES (@userId, @membershipId)
+//       `);
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error('Lỗi khi thêm membership:', err);
+//     res.status(500).send('Lỗi server');
+//   }
+// });
 
 // Xóa gói tập
 router.delete('/memberships/:id', async (req, res) => {

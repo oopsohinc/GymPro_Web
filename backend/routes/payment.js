@@ -60,6 +60,27 @@ router.patch('/payments/:id/status', async (req, res) => {
   }
 });
 
+router.post('/payments', async (req, res) => {
+  const { userId, membershipId, amount } = req.body;
+
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input('userId', sql.Int, userId)
+      .input('membershipId', sql.Int, membershipId)
+      .input('amount', sql.Decimal(10, 2), amount)
+      .query(`
+        INSERT INTO Payments (user_id, membership_id, amount)
+        OUTPUT INSERTED.id
+        VALUES (@userId, @membershipId, @amount)
+      `);
+
+    res.status(201).json({ message: 'Payment created successfully', paymentId: result.recordset[0].id });
+  } catch (err) {
+    console.error('Error creating payment:', err);
+    res.status(500).json({ error: 'Failed to create payment' });
+  }
+});
 
 // Thanh toán trực tiếp
 router.post('/payments/create-qr', async (req, res) => {
@@ -91,11 +112,44 @@ router.post('/payments/create-qr', async (req, res) => {
 
     return res.status(200).json({ vnpayResponse });
 });
+router.post('/payments/members/create-qr', async (req, res) => {
+    const { paymentId, amount, full_name, orderInfo, userId } = req.body;
+
+    const vnpay = new VNPay({
+        tmnCode: 'YXC7JZLY',
+        secureSecret: '7CYIPMPBQJ1N84RIMRBDT37IKIHPHRYF',
+        vnpayHost: 'https://sandbox.vnpayment.vn',
+        testMode: true,
+        hashAlgorithm: 'SHA512',
+        loggerFn: ignoreLogger
+    });
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const vnpayResponse = await vnpay.buildPaymentUrl({
+        vnp_Amount: amount,
+        vnp_IpAddr: '127.0.0.1',
+        vnp_TxnRef: `txn_${paymentId}_${dateFormat(new Date(), "yyyymmddHHMMss")}`,
+        vnp_OrderInfo: orderInfo || `Thanh toán cho đơn hàng ${userId} - ${paymentId}`,
+        vnp_OrderType: ProductCode.Other,
+        vnp_ReturnUrl: `http://127.0.0.1:5500/Member/index.html?id=${userId}#callback`,
+        vnp_Locale: VnpLocale.VN,
+        vnp_CreateDate: dateFormat(new Date(), 'yyyyMMddHHmmss'),
+        vnp_ExpireDate: dateFormat(tomorrow)
+    });
+
+    return res.status(200).json({ vnpayResponse });
+});
 
 router.get('/payments/callback', async (req, res) => {
-  const query = new URLSearchParams(req.query).toString();
-  res.redirect(`http://127.0.0.1:5500/html/index.html#callback?${query}`);
+  const { userId, ...rest } = req.query; // lấy userId ra riêng
+  const query = new URLSearchParams(rest).toString();
+
+  // redirect về Member/index.html với đúng userId
+  res.redirect(`http://127.0.0.1:5500/Member/index.html?id=${userId}&${query}`);
 });
+
 
 
 module.exports = router;

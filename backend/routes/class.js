@@ -96,6 +96,26 @@ router.post('/classes', async (req, res) => {
     res.status(500).send(`Lỗi server: ${err.message}`);
   }
 });
+router.post('/classes_members', async (req, res) => {
+  const { class_id, user_id } = req.body;
+  try {
+    const pool = await sql.connect(config);
+
+    // Thêm lớp học mới
+    await pool.request()
+      .input('class_id', sql.Int, class_id)
+      .input('user_id', sql.Int, user_id)
+      .query(`
+        INSERT INTO Member_Classes (class_id, user_id)
+        VALUES (@class_id, @user_id)
+      `);
+
+    res.json({ success: true, message: 'Thêm lớp học thành công' });
+  } catch (err) {
+    console.error('Lỗi khi thêm lớp học:', err);
+    res.status(500).send(`Lỗi server: ${err.message}`);
+  }
+});
 
 // Cập nhật thông tin lớp học
 router.put('/classes/:id', async (req, res) => {
@@ -214,7 +234,7 @@ router.get('/classes/active', async (req, res) => {
 });
 
 // Lấy danh sách lớp học đã book
-router.get('/classes/bookings', async (req, res) => {
+router.get('/bookings', async (req, res) => {
   try {
     const pool = await sql.connect(config);
     const result = await pool.request()

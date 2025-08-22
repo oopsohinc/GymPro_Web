@@ -179,7 +179,7 @@ async function loadDashboardAlt(userId) {
 
         // === Cập nhật thống kê ===
         $('#active-membership').textContent = dataProfile.membership || 'N/A';
-        $('#classes-booked').textContent = dataStats.enrolled || 0;
+        $('#classes-booked').textContent = dataProfile.enrolled || 0;
         $('#available-memberships').textContent = dataStats.totalMemberships || 0;
 
         // === Lọc lớp học hôm nay ===
@@ -369,35 +369,35 @@ async function loadMemberships() {
 //     }
 // }
 
-function openUpgradeModal(membershipId) {
-    selectedMembership = mockData.memberships.find(m => m.id === membershipId);
-    if (!selectedMembership) return;
-    // Đảm bảo chỉ mở upgrade modal, đóng booking modal nếu đang mở
-    closeModal('class-booking-modal');
-    $('#upgrade-title').textContent = `Upgrade to ${selectedMembership.name}`;
+// function openUpgradeModal(membershipId) {
+//     selectedMembership = mockData.memberships.find(m => m.id === membershipId);
+//     if (!selectedMembership) return;
+//     // Đảm bảo chỉ mở upgrade modal, đóng booking modal nếu đang mở
+//     closeModal('class-booking-modal');
+//     $('#upgrade-title').textContent = `Upgrade to ${selectedMembership.name}`;
     
-    $('#membership-preview').innerHTML = `
-        <div class="card" style="background: linear-gradient(135deg, rgb(147, 51, 234), rgb(236, 72, 153)); color: white; margin-bottom: 1rem;">
-            <div class="card-content">
-                <h4 style="color: white; margin-bottom: 0.5rem;">${selectedMembership.name} Membership</h4>
-                <p style="color: rgba(255, 255, 255, 0.8);">Unlock premium features and unlimited access</p>
-            </div>
-        </div>
+//     $('#membership-preview').innerHTML = `
+//         <div class="card" style="background: linear-gradient(135deg, rgb(147, 51, 234), rgb(236, 72, 153)); color: white; margin-bottom: 1rem;">
+//             <div class="card-content">
+//                 <h4 style="color: white; margin-bottom: 0.5rem;">${selectedMembership.name} Membership</h4>
+//                 <p style="color: rgba(255, 255, 255, 0.8);">Unlock premium features and unlimited access</p>
+//             </div>
+//         </div>
         
-        <div style="margin-bottom: 1rem;">
-            ${selectedMembership.features.map(feature => `
-                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgb(34, 197, 94)" stroke-width="2" style="margin-right: 0.75rem;">
-                        <path d="M20 6L9 17l-5-5"></path>
-                    </svg>
-                    <span>${feature}</span>
-                </div>
-            `).join('')}
-        </div>
-    `;
+//         <div style="margin-bottom: 1rem;">
+//             ${selectedMembership.features.map(feature => `
+//                 <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+//                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgb(34, 197, 94)" stroke-width="2" style="margin-right: 0.75rem;">
+//                         <path d="M20 6L9 17l-5-5"></path>
+//                     </svg>
+//                     <span>${feature}</span>
+//                 </div>
+//             `).join('')}
+//         </div>
+//     `;
     
-    openModal('membership-upgrade-modal');
-}
+//     openModal('membership-upgrade-modal');
+// }
 async function openUpgrade(encodedMembership) {
     try {
         const membership = JSON.parse(decodeURIComponent(encodedMembership));
@@ -459,6 +459,7 @@ async function handlePayment(payment) {
                 userId: payment.userId,
                 paymentId: payment.paymentId,
                 amount: payment.amount,
+                membershipId: payment.membershipId,
                 orderInfo: `Thanh toán cho ${payment.userId} - ${payment.membershipId}`,
             }),
         });
@@ -492,6 +493,8 @@ async function handleVNPayResponse() {
         const responseCode = params.get('vnp_ResponseCode');
         const txnRef = params.get('vnp_TxnRef'); // dạng: txn_16_1
         const paymentId = txnRef ? txnRef.split('_')[1] : null;
+        const membershipId = txnRef ? txnRef.split('_')[2] : null;
+
 
         const errorMessages = {
             '00': 'Giao dịch thành công',
@@ -520,6 +523,11 @@ async function handleVNPayResponse() {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ status: '1', userId }) // gửi kèm userId nếu cần
+                        });
+                        await fetch(`http://localhost:3000/api/memberships/user/${userId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ membershipId }) // gửi kèm userId nếu cần
                         });
 
                         showToast(`✅ ${message} (Đơn hàng #${paymentId} đã cập nhật thành công).`, 'success');
@@ -591,6 +599,7 @@ function processUpgrade() {
 
 // Classes Functions
 let allClasses = [];
+let allTrainers = [];
 async function loadClasses() {
     try {
         const response = await fetch('http://localhost:3000/api/classes');
@@ -607,6 +616,7 @@ async function loadClasses() {
             dataTrainers.map(trainer => `<option value="${trainer.trainer_id}">${trainer.full_name}</option>`).join('');
     
         allClasses = dataClasses;
+        allTrainers = dataTrainers;
 
     applyClassFilters();
     } catch (error) {
@@ -759,15 +769,47 @@ function renderClasses(classes) {
         `;
     }).join('');
 }
+
+async function checkBookedStatus(classId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/bookings`);
+        const data = await response.json();
+        console.log('Kieu data:', classId, typeof Number(classId));
+        for (const item of data) {
+            if (item.class_id === Number(classId) && item.user_id === Number(userId)) {
+                console.log(item);
+                return true;
+            }
+        }
+        return false;
+    } catch (error) {
+        console.error('Error checking booking status:', error);
+        return false;
+    }
+}
+
+let selectedClassId = null;
+
 async function openBookingModal(classId) {
+    selectedClassId = classId;
+    const membershipId = await checkMembershipStatus();
+
+    if (!membershipId || membershipId.length === 0) {
+        showToast('Error', 'You must have an active membership to book classes.', 'error');
+        return;
+    }
+    if (await checkBookedStatus(classId)) {
+        showToast('Error', 'You have already booked this class.', 'error');
+        return;
+    }
     try {
         const response = await fetch(`http://localhost:3000/api/classes/${classId}`);
         const classItem = await response.json();
 
         if (!classItem) return;
-    
-        const trainer = classItem.full_name;
-    
+
+        const trainer = allTrainers.find(t => t.trainer_id === classItem.trainer_id)?.full_name || "Unknown";
+
         $('#booking-class-name').textContent = classItem.name;
         $('#booking-trainer-name').textContent = `with ${trainer}`;
     
@@ -778,7 +820,7 @@ async function openBookingModal(classId) {
                 <input type="radio" name="timeSlot" value="${classItem.class_id}" id="slot-${classItem.class_id}">
                 <label for="slot-${classItem.class_id}" class="time-slot-info">
                 <div class="time-slot-label">
-                        ${classItem.schedule} - ${classItem.time}
+                        ${classItem.schedule} - ${formatTime(classItem.time)}
                 </div>
                     <div class="time-slot-spots">${classItem.max_capacity - classItem.capacity} spots available</div>
             </label>
@@ -794,7 +836,7 @@ async function loadSchedule() {
     showLoading();
     try {
         // Lấy danh sách booking từ API
-        const response = await fetch('http://localhost:3000/api/classes/bookings'); 
+        const response = await fetch('http://localhost:3000/api/bookings'); 
         
         if (!response.ok) {
             hideLoading();
@@ -815,9 +857,9 @@ async function loadSchedule() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${item.name}</td>
-                <td>${item.date}</td>
-                <td>${item.time}</td>
-                <td>${item.trainerName || "Unknown"}</td>
+                <td>${item.schedule || "Unknown"}</td>
+                <td>${formatTime(item.time)}</td>
+                <td>${item.full_name || "Unknown"}</td>
                 <td>${item.status || "Registered"}</td>
             `;
             tbody.appendChild(tr);
@@ -832,6 +874,35 @@ async function loadSchedule() {
     } catch (error) {
         hideLoading();
         console.error("Load schedule error:", error);
+        showToast('Error', 'Something went wrong.', 'error');
+    }
+}
+
+async function confirmBooking() {
+    if (!selectedClassId) {
+        showToast('Error', 'No class selected for booking.', 'error');
+        return;
+    }
+    try {
+        const res = await fetch('http://localhost:3000/api/classes_members', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                class_id: selectedClassId,
+                user_id: userId
+            })
+        });
+
+        if (!res.ok) {
+            showToast('Error', 'Failed to confirm booking.', 'error');
+            return;
+        }
+
+        closeModal('class-booking-modal');
+        showToast('Success', 'Booking confirmed successfully!', 'success');
+    } catch (error) {
         showToast('Error', 'Something went wrong.', 'error');
     }
 }
@@ -1154,10 +1225,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Global functions for onclick handlers
 window.showPage = showPage;
-window.openUpgradeModal = openUpgradeModal;
+// window.openUpgradeModal = openUpgradeModal;
 window.processUpgrade = processUpgrade;
 window.openBookingModal = openBookingModal;
-//window.confirmBooking = confirmBooking;
+window.confirmBooking = confirmBooking;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.loadProfileData = loadProfileData;

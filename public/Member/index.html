@@ -523,51 +523,7 @@
         </div>
 
         <!-- Membership Upgrade Modal -->
-        <div id="membership-upgrade-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="upgrade-title">Upgrade Membership</h3>
-                    <button class="modal-close" onclick="closeModal('membership-upgrade-modal')">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="membership-preview" id="membership-preview">
-                        <!-- Membership info will be populated by JavaScript -->
-                    </div>
-                    
-                    <div class="payment-form">
-                        <h4>Payment Information</h4>
-                        <form id="payment-form">
-                            <div class="form-group">
-                                <label for="cardholderName">Cardholder Name</label>
-                                <input type="text" id="cardholderName" placeholder="John Smith" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="cardNumber">Card Number</label>
-                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="expiryDate">Expiry Date</label>
-                                    <input type="text" id="expiryDate" placeholder="MM/YY" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="cvv">CVV</label>
-                                    <input type="text" id="cvv" placeholder="123" required>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-primary" onclick="processUpgrade()">Upgrade Now</button>
-                    <button class="btn-secondary" onclick="closeModal('membership-upgrade-modal')">Cancel</button>
-                </div>
-            </div>
-        </div>
+        
     </div>
 
     <!-- Toast Container -->

@@ -113,7 +113,7 @@ router.post('/payments/create-qr', async (req, res) => {
     return res.status(200).json({ vnpayResponse });
 });
 router.post('/payments/members/create-qr', async (req, res) => {
-    const { paymentId, amount, full_name, orderInfo, userId } = req.body;
+    const { paymentId, amount, membershipId, orderInfo, userId } = req.body;
 
     const vnpay = new VNPay({
         tmnCode: 'YXC7JZLY',
@@ -130,8 +130,8 @@ router.post('/payments/members/create-qr', async (req, res) => {
     const vnpayResponse = await vnpay.buildPaymentUrl({
         vnp_Amount: amount,
         vnp_IpAddr: '127.0.0.1',
-        vnp_TxnRef: `txn_${paymentId}_${dateFormat(new Date(), "yyyymmddHHMMss")}`,
-        vnp_OrderInfo: orderInfo || `Thanh toán cho đơn hàng ${userId} - ${paymentId}`,
+        vnp_TxnRef: `txn_${paymentId}_${membershipId}_${dateFormat(new Date(), "yyyymmddHHMMss")}`,
+        vnp_OrderInfo: orderInfo || `Thanh toán cho đơn hàng ${userId} - ${paymentId} - ${membershipId}`,
         vnp_OrderType: ProductCode.Other,
         vnp_ReturnUrl: `http://127.0.0.1:5500/Member/index.html?id=${userId}#callback`,
         vnp_Locale: VnpLocale.VN,

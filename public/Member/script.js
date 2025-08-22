@@ -836,11 +836,10 @@ async function loadSchedule() {
     showLoading();
     try {
         // Lấy danh sách booking từ API
-        const response = await fetch('http://localhost:3000/api/bookings'); 
-        
+        const response = await fetch(`http://localhost:3000/api/bookings/${userId}`);
+
         if (!response.ok) {
             hideLoading();
-            showToast('Error', 'Failed to load schedule.', 'error'); 
             return;
         }
 
@@ -864,8 +863,6 @@ async function loadSchedule() {
             `;
             tbody.appendChild(tr);
         });
-
-        showToast('Success', 'Schedule loaded successfully!');
         
         // Refresh dashboard nếu đang ở dashboard
         if (currentPage === 'dashboard') {

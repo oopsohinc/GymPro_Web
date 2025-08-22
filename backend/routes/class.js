@@ -234,15 +234,18 @@ router.get('/classes/active', async (req, res) => {
 });
 
 // Lấy danh sách lớp học đã book
-router.get('/bookings', async (req, res) => {
+router.get('/bookings/:userId', async (req, res) => {
+  const { userId } = req.params;
   try {
     const pool = await sql.connect(config);
     const result = await pool.request()
+      .input('userId', sql.Int, userId)
       .query(`SELECT Classes.time, Classes.name, Classes.schedule, Classes.class_id, Trainers.trainer_id, 
         Trainers.full_name, Member_Classes.user_id 
         FROM     Classes INNER JOIN
         Trainers ON Classes.trainer_id = Trainers.trainer_id INNER JOIN
-        Member_Classes ON Classes.class_id = Member_Classes.class_id`);
+        Member_Classes ON Classes.class_id = Member_Classes.class_id
+        WHERE Member_Classes.user_id = @userId`);
 
     res.json(result.recordset);
   } catch (err) {

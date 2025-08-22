@@ -86,6 +86,9 @@ function showPage(pageId) {
         case 'profile':
             loadProfile();
             break;
+        case 'schedule':
+            loadSchedule();
+            break;
     }
     
     // Close mobile menu
@@ -787,91 +790,137 @@ async function openBookingModal(classId) {
         console.error('Error loading class:', error);
 }
 }
-async function confirmBooking() {
-    const selectedSlot = $('input[name="timeSlot"]:checked');
-    
-    if (!selectedSlot) {
-        showToast('Error', 'Please select a time slot.', 'error');
-        return;
-    }
-    
+async function loadSchedule() {
     showLoading();
-    
-    // Simulate API call
-    setTimeout(() => {
-        hideLoading();
+    try {
+        // Lấy danh sách booking từ API
+        const response = await fetch('http://localhost:3000/api/classes/bookings'); 
         
-        // Update class as booked in today's classes if it's a today slot
-        const slotIndex = parseInt(selectedSlot.value);
-        const selectedSchedule = selectedClass.schedules[slotIndex];
-        
-        if (selectedSchedule.date === 'today') {
-            const todayClass = mockData.todaysClasses.find(c => c.name === selectedClass.name);
-            if (todayClass) {
-                todayClass.isBooked = true;
-            }
+        if (!response.ok) {
+            hideLoading();
+            showToast('Error', 'Failed to load schedule.', 'error'); 
+            return;
         }
-        // Lưu vào localStorage để hiển thị ở trang Schedule
-        const newSchedule = {
-        className: selectedClass.name,
-        date: selectedSchedule.date,
-        time: selectedSchedule.time,
-        trainer: (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
-        status: "Registered"
-        };
 
-        let savedSchedules = JSON.parse(localStorage.getItem("schedules")) || [];
-        savedSchedules.push(newSchedule);
-        localStorage.setItem("schedules", JSON.stringify(savedSchedules));
-        window.onload = function () {
-        const savedSchedules = JSON.parse(localStorage.getItem("schedules")) || [];
+        const bookings = await response.json();
+        hideLoading();
+
+        // Xóa nội dung cũ trong bảng
         const tbody = document.getElementById('schedule-body');
+        if (!tbody) return;
+        tbody.innerHTML = "";
 
-        savedSchedules.forEach(item => {
+        // Đổ dữ liệu booking vào bảng
+        bookings.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-            <td>${item.className}</td>
-            <td>${formatScheduleDate(item.date)}</td>
-            <td>${item.time}</td>
-            <td>${item.trainer}</td>
-            <td>${item.status}</td>
+                <td>${item.name}</td>
+                <td>${item.date}</td>
+                <td>${item.time}</td>
+                <td>${item.trainerName || "Unknown"}</td>
+                <td>${item.status || "Registered"}</td>
             `;
             tbody.appendChild(tr);
         });
-        };
-        // Thêm lịch vào bảng Schedule
-        addScheduleRow(
-        selectedClass.name,
-        selectedSchedule.date,
-        selectedSchedule.time,
-        (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
-        "Registered"
-        );
-        showToast('Success', 'Class booked successfully!');
-        closeModal('class-booking-modal');
+
+        showToast('Success', 'Schedule loaded successfully!');
         
-        // Refresh dashboard if currently on dashboard
+        // Refresh dashboard nếu đang ở dashboard
         if (currentPage === 'dashboard') {
             loadDashboard();
         }
-    }, 1500);
+    } catch (error) {
+        hideLoading();
+        console.error("Load schedule error:", error);
+        showToast('Error', 'Something went wrong.', 'error');
+    }
 }
-window.onload = function () {
-  const savedSchedules = JSON.parse(localStorage.getItem("schedules")) || [];
-  const tbody = document.getElementById('schedule-body');
 
-  savedSchedules.forEach(item => {
-    addScheduleRow(item.className, item.date, item.time, item.trainer, item.status);
-  });
-};
-// Schedule function
+// async function confirmBooking() {
+//     const selectedSlot = $('input[name="timeSlot"]:checked');
+    
+//     if (!selectedSlot) {
+//         showToast('Error', 'Please select a time slot.', 'error');
+//         return;
+//     }
+    
+//     showLoading();
+    
+//     // Simulate API call
+//     setTimeout(() => {
+//         hideLoading();
+        
+//         // Update class as booked in today's classes if it's a today slot
+//         const slotIndex = parseInt(selectedSlot.value);
+//         const selectedSchedule = selectedClass.schedules[slotIndex];
+        
+//         if (selectedSchedule.date === 'today') {
+//             const todayClass = mockData.todaysClasses.find(c => c.name === selectedClass.name);
+//             if (todayClass) {
+//                 todayClass.isBooked = true;
+//             }
+//         }
+//         // Lưu vào localStorage để hiển thị ở trang Schedule
+//         const newSchedule = {
+//         className: selectedClass.name,
+//         date: selectedSchedule.date,
+//         time: selectedSchedule.time,
+//         trainer: (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
+//         status: "Registered"
+//         };
+
+//         let savedSchedules = JSON.parse(localStorage.getItem("schedules")) || [];
+//         savedSchedules.push(newSchedule);
+//         localStorage.setItem("schedules", JSON.stringify(savedSchedules));
+//         window.onload = function () {
+//         const savedSchedules = JSON.parse(localStorage.getItem("schedules")) || [];
+//         const tbody = document.getElementById('schedule-body');
+
+//         savedSchedules.forEach(item => {
+//             const tr = document.createElement('tr');
+//             tr.innerHTML = `
+//             <td>${item.className}</td>
+//             <td>${formatScheduleDate(item.date)}</td>
+//             <td>${item.time}</td>
+//             <td>${item.trainer}</td>
+//             <td>${item.status}</td>
+//             `;
+//             tbody.appendChild(tr);
+//         });
+//         };
+//         // Thêm lịch vào bảng Schedule
+//         addScheduleRow(
+//         selectedClass.name,
+//         selectedSchedule.date,
+//         selectedSchedule.time,
+//         (mockData.trainers.find(t => t.id === selectedClass.trainerId)?.name || "Unknown"),
+//         "Registered"
+//         );
+//         showToast('Success', 'Class booked successfully!');
+//         closeModal('class-booking-modal');
+        
+//         // Refresh dashboard if currently on dashboard
+//         if (currentPage === 'dashboard') {
+//             loadDashboard();
+//         }
+//     }, 1500);
+// }
+// window.onload = function () {
+//   const savedSchedules = JSON.parse(localStorage.getItem("schedules")) || [];
+//   const tbody = document.getElementById('schedule-body');
+
+//   savedSchedules.forEach(item => {
+//     addScheduleRow(item.className, item.date, item.time, item.trainer, item.status);
+//   });
+// };
+// // Schedule function
 function addScheduleRow(className, date, time, trainer, status = "Registered") {
     const tbody = document.getElementById('schedule-body');
     if (!tbody) return;
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td>${className}</td>
-        <td>${formatScheduleDate(date)}</td>
+        <td>${date}</td>
         <td>${time}</td>
         <td>${trainer}</td>
         <td>${status}</td>
@@ -1108,7 +1157,7 @@ window.showPage = showPage;
 window.openUpgradeModal = openUpgradeModal;
 window.processUpgrade = processUpgrade;
 window.openBookingModal = openBookingModal;
-window.confirmBooking = confirmBooking;
+//window.confirmBooking = confirmBooking;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.loadProfileData = loadProfileData;

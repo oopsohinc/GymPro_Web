@@ -213,4 +213,21 @@ router.get('/classes/active', async (req, res) => {
   }
 });
 
+// Lấy danh sách lớp học đã book
+router.get('/classes/bookings', async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .query(`SELECT Classes.time, Classes.name, Classes.schedule, Classes.class_id, Trainers.trainer_id, 
+        Trainers.full_name, Member_Classes.user_id 
+        FROM     Classes INNER JOIN
+        Trainers ON Classes.trainer_id = Trainers.trainer_id INNER JOIN
+        Member_Classes ON Classes.class_id = Member_Classes.class_id`);
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Lỗi khi lấy lớp học active:', err);
+    res.status(500).send('Lỗi server');
+  }
+}); 
 module.exports = router;
